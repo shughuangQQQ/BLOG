@@ -20,7 +20,7 @@ typedef enum {false true}bool;
 #define TIAL_SIZE 1024
 #define PACK_SIZE sizeof(conv_pack)
 #define CHILD_PROCESS_NUM 5
-
+#define nsjf 5
 void run_parent_process();
 void add_sig();
 void sig_action(int sig);
