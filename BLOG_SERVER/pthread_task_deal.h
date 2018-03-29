@@ -12,6 +12,7 @@
 #define MAX_PTHREAD_NUM 100
 #define MAX_TASK_NUM 100
 #define DEFAULT_ADD 5
+void *analysedata(int client_fd);
 typedef struct node
 {
 	pthread_t *tids;
@@ -247,11 +248,7 @@ pthread_pool_data *create_pthread_pool()
 
 	
 }
-void *analysedata(int client_fd)
-{
-	
 
-}
 void *add_task(pthread_pool_data* m_pthread_pool,int client_fd)
 {
 	pthread_mutex_lock(&m_pthread_pool->thread_pool_data_lock);
