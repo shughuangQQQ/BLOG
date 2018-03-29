@@ -11,6 +11,8 @@
 #include<signal.h>
 #include<sys/wait.h>
 #include<sys/stat.h>
+
+#include"pthread_task_deal.h"
 typedef enum {PACK_CHAR,PACK_ETC}PACK_TYPE;
 typedef enum {false true}bool;
 #define SERVER_PORT 8000

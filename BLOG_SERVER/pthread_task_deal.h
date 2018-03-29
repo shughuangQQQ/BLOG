@@ -1,6 +1,6 @@
 #ifndef PTHREAD_CLASS
 #define PTHREAD_CLASS
-
+#include"server_data_analy.h"
 
 #include<string.h>
 #include<stdio.h>
