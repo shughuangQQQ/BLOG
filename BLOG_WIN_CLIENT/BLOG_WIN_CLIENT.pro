@@ -29,8 +29,7 @@ SOURCES += \
     q_tcp_util.cpp \
     ui_flush_util.cpp \
     login_in_ui.cpp \
-    dataras.cpp \
-    test.cpp
+    dataras.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,8 +37,7 @@ HEADERS += \
     net_pack.h \
     ui_flush_util.h \
     login_in_ui.h \
-    dataras.h \
-    test.h
+    dataras.h
 
 FORMS += \
         mainwindow.ui \
