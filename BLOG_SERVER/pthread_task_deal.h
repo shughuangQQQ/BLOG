@@ -1,20 +1,27 @@
 #ifndef PTHREAD_CLASS
 #define PTHREAD_CLASS
 #include"server_data_analy.h"
-
+#include"PAC_INET.h"
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
+#include<errno.h>
 #include<pthread.h>
+#include<signal.h>
 #define SLEEP_TIME 10
 #define SCANNER_PTHREAD_POOL_TIME 10
 #define MIN_PTHREAD_NUM 5
 #define MAX_PTHREAD_NUM 100
 #define MAX_TASK_NUM 100
 #define DEFAULT_ADD 5
+typedef struct node7
+{
+	void * (*task_fun)(int client_fd);
+	int fd;
+}task_queue;
 
-typedef struct node
+typedef struct node6
 {
 	pthread_t *tids;
 	task_queue *tasks;
@@ -30,11 +37,6 @@ typedef struct node
 	int task_num;
 	int is_shutdown;
 }pthread_pool_data;
-typedef struct node2
-{
-	void * (*task_fun)(int client_fd);
-	int fd;
-}task_queue;
 void *pthread_fun(void *argv);
 int is_ALIVE(pid_t tid);
 void pthread_pool_destory(pthread_pool_data* m_pool);
@@ -55,8 +57,8 @@ void *add_task(pthread_pool_data* m_pthread_pool,int client_fd)
 	}
 	else 
 	{
-		m_pthread_pool->tasks[task_queue_tail].task_fun=analysedata;
-		m_pthread_pool->tasks[task_queue_tail].fd=client_fd;
+		m_pthread_pool->tasks[m_pthread_pool->task_queue_tail].task_fun=analysedata;
+		m_pthread_pool->tasks[m_pthread_pool->task_queue_tail].fd=client_fd;
 
 		m_pthread_pool->task_queue_tail=(m_pthread_pool->task_queue_tail+1)%MAX_TASK_NUM;
 		m_pthread_pool->task_num++;
@@ -88,11 +90,11 @@ void pthread_pool_destory(pthread_pool_data* m_pool)
 
 	}
 	pthread_mutex_lock(&m_pool->thread_pool_data_lock);
-	pthread_mutex_destory(&m_pool->thread_pool_data_lock);
+	pthread_mutex_destroy(&m_pool->thread_pool_data_lock);
 	pthread_mutex_lock(&m_pool->thread_pool_count_lock);
-	pthread_mutex_destory(&m_pool->thread_pool_count_lock);
-	pthread_cond_destory(&m_pool->task_queue_not_empty_lock);
-	pthread_cond_destory(&m_pool->task_queue_not_full_lock);
+	pthread_mutex_destroy(&m_pool->thread_pool_count_lock);
+	pthread_cond_destroy(&m_pool->task_queue_not_empty_lock);
+	pthread_cond_destroy(&m_pool->task_queue_not_full_lock);
 
 	free(m_pool->tids);
 	free(m_pool->tasks);
@@ -122,7 +124,7 @@ void *pthread_fun(void *argv)
 		
 
 
-		pthread_cond_wait(&mpool->task_queue_not_empty_lock,&thread_pool_data_lock);
+		pthread_cond_wait(&m_pool->task_queue_not_empty_lock,&m_pool->thread_pool_data_lock);
 
 		if(m_pool->exit_thread)
 		{
@@ -145,17 +147,17 @@ void *pthread_fun(void *argv)
 
 		m_pool->task_num--;
 		m_pool->task_queue_front=(m_pool->task_queue_front+1)%MAX_TASK_NUM;
-		newtask.task_fun=m_pool->tasks[task_queue_tail];
-		newtask.fd=m_pool->tasks[task_queue_tail].fd;
+		newtask.task_fun=m_pool->tasks[m_pool->task_queue_tail].task_fun;
+		newtask.fd=m_pool->tasks[m_pool->task_queue_tail].fd;
 		pthread_cond_broadcast(&m_pool->task_queue_not_full_lock);
-		pthread_mutex_lock(m_pool->thread_pool_count_lock);
+		pthread_mutex_lock(&m_pool->thread_pool_count_lock);
 		m_pool->busy_thread++;
-		pthread_mutex_unlock(m_pool->thread_pool_count_lock);
-		pthread_mutex_unlock(m_pool->thread_pool_data_lock);
+		pthread_mutex_unlock(&m_pool->thread_pool_count_lock);
+		pthread_mutex_unlock(&m_pool->thread_pool_data_lock);
 		(*(newtask.task_fun))(newtask.fd);
-		pthread_mutex_lock(m_pool->thread_pool_count_lock);
+		pthread_mutex_lock(&m_pool->thread_pool_count_lock);
 		m_pool->busy_thread--;
-		pthread_mutex_unlock(m_pool->thread_pool_count_lock);
+		pthread_mutex_unlock(&m_pool->thread_pool_count_lock);
 
 
 
@@ -209,7 +211,7 @@ void *pthread_adjust_fun(void *argv)
 					continue;
 				else if(m_pool->tids[i]==0||!is_ALIVE(m_pool->tids[i]))
 				{
-					if(0!=pthread_create(m_pool->tids[i],0,pthread_fun,(void *)m_pool))
+					if(pthread_create(&m_pool->tids[i],0,pthread_fun,(void *)m_pool))
 					{
 						printf("extend pthread failed\n");
 					}
@@ -257,7 +259,7 @@ pthread_pool_data *create_pthread_pool()
 	{
 		printf("malloc failed\n");
 	}
-	m_pthread_pool->tids=(pthread_t*)malloc(sizeof(pthread_t)*MAX_PTHREAD_NUM)
+	m_pthread_pool->tids=(pthread_t*)malloc(sizeof(pthread_t)*MAX_PTHREAD_NUM);
 		if(NULL==m_pthread_pool->tids)
 	{
 		printf("malloc failed\n");
@@ -269,10 +271,10 @@ pthread_pool_data *create_pthread_pool()
 		printf("malloc error\n");
 	}
 	memset(m_pthread_pool->tasks,0,sizeof(m_pthread_pool->tasks));
-	pthread_mutex_init(&m_pthread_pool->thread_pool_count_lock);
-	pthread_cond_init(&m_pthread_pool->task_queue_not_empty_lock);
-	pthread_cond_init(&m_pthread_pool->task_queue_not_full_lock);
-	pthread_mutex_init(&m_pthread_pool->thread_pool_data_lock);
+	pthread_mutex_init(&m_pthread_pool->thread_pool_count_lock,NULL);
+	pthread_cond_init(&m_pthread_pool->task_queue_not_empty_lock,NULL);
+	pthread_cond_init(&m_pthread_pool->task_queue_not_full_lock,NULL);
+	pthread_mutex_init(&m_pthread_pool->thread_pool_data_lock,NULL);
 	m_pthread_pool->busy_thread=0;
 	m_pthread_pool->is_shutdown=false;
 	m_pthread_pool->live_thread=0;
@@ -282,16 +284,16 @@ pthread_pool_data *create_pthread_pool()
 	m_pthread_pool->task_num=0;
 	
 	int i;
-	for(i=0;i<MIN_PTHREAD_NUML;i++)
+	for(i=0;i<MIN_PTHREAD_NUM;i++)
 	{
 		if(i==0)
-			if(0!=pthread_create(m_pthread_pool->tids[i],0,pthread_adjust_fun,(void *)m_pthread_pool))
+			if(pthread_create(&m_pthread_pool->tids[i],0,pthread_adjust_fun,(void *)m_pthread_pool))
 			{
 				printf("create thread pthread_adjust_fun error\n");
 			}
 		else
 		{
-			if(0!=pthread_create(m_pthread_pool->tids[i],0,pthread_fun,(void *)m_pthread_pool))
+			if(pthread_create(&m_pthread_pool->tids[i],0,pthread_fun,(void *)m_pthread_pool))
 			{
 				printf("create pthread error \n");
 			}
