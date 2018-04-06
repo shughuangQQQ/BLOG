@@ -14,7 +14,7 @@
 #include<arpa/inet.h>
 #include<sys/stat.h>
 #include"PAC_INET.h"
-#define SERVER_PORT 8000
+#define SERVER_PORT 8005
 #define SERVER_IP_1 INADDR_ANY
 #include"pthread_task_deal.h"
 #define MAX_LISTEN_NUM 100
@@ -54,21 +54,25 @@ int main()
 {
 
 
-	int server_fd;
+	int server_fd;	
 	p_util.epoll_fd=epoll_create(MAX_LISTEN_NUM);
+	
 	p_util.close_process=true;
 	struct sockaddr_in server_addr;
+	
 	int a=socket(server_fd,AF_INET,0);
+	
 	if(a==-1)
 	{
-		printf("scoket_create failed\n");	
+		printf("scoket_create failed  %d\n",errno);	
 	}
 	server_addr.sin_family=AF_INET;
 	server_addr.sin_port=htonl(SERVER_PORT);
-	server_addr.sin_addr.s_addr=htons(SERVER_IP_1);
+	server_addr.sin_addr.s_addr=htons(INADDR_ANY);
+	
 	if(-1==bind(server_fd,(struct sockaddr*)&server_addr,sizeof(server_addr)))
 	{
-		printf("sock_bind failed\n");	
+		printf("sock_bind failed errno%d\n",errno);	
 	}
 	p_util.servers_fd=server_fd;
 	if(-1==listen(server_fd,LISTEN))
