@@ -14,8 +14,8 @@
 #include<arpa/inet.h>
 #include<sys/stat.h>
 #include"PAC_INET.h"
-#define SERVER_PORT 8005
-#define SERVER_IP_1 INADDR_ANY
+#define SERVER_PORT 8020
+#define SERVER_IP_1 "127.0.0.1"
 #include"pthread_task_deal.h"
 #define MAX_LISTEN_NUM 100
 #define CHILD_PROCESS_NUM 5
@@ -45,8 +45,8 @@ typedef struct node3
 }process_utils;
 void creaete_process();
 void add_epoll_fd(int fd);
-static process_utils p_util;
-static int client_fd=0;
+process_utils p_util;
+int client_fd=0;
 
 
 
@@ -54,22 +54,20 @@ int main()
 {
 
 
-	int server_fd;	
-	p_util.epoll_fd=epoll_create(MAX_LISTEN_NUM);
-	
+
 	p_util.close_process=true;
 	struct sockaddr_in server_addr;
-	
-	int a=socket(server_fd,AF_INET,0);
-	
-	if(a==-1)
+
+	int server_fd=socket(AF_INET,SOCK_STREAM,0);
+
+	if(server_fd==-1)
 	{
 		printf("scoket_create failed  %d\n",errno);	
 	}
 	server_addr.sin_family=AF_INET;
-	server_addr.sin_port=htonl(SERVER_PORT);
-	server_addr.sin_addr.s_addr=htons(INADDR_ANY);
-	
+	server_addr.sin_port=htons(SERVER_PORT);
+	//server_addr.sin_addr.s_addr=htonl(SERVER_IP_1);
+	inet_pton(AF_INET,SERVER_IP_1,&server_addr.sin_addr.s_addr);	
 	if(-1==bind(server_fd,(struct sockaddr*)&server_addr,sizeof(server_addr)))
 	{
 		printf("sock_bind failed errno%d\n",errno);	
@@ -83,11 +81,15 @@ int main()
 	creaete_process();
 	if(p_util.m_index==-1)
 	{
+		
+		p_util.epoll_fd=epoll_create(MAX_LISTEN_NUM);
 		run_parent_process();	
 	}
 	else
 	{
-		printf("child run\n");
+		
+		p_util.epoll_fd=epoll_create(MAX_LISTEN_NUM);
+		printf("child run m_index:%d\n",p_util.m_index);
 		pthread_pool_data* childe_thread_pool=create_pthread_pool();
 		run_child_process();	
 	}
@@ -112,7 +114,7 @@ void add_epoll_fd(int fd)
 }
 void run_parent_process()
 {
-	
+
 	if(-1==socketpair(AF_UNIX,SOCK_STREAM,0,m_pipe_parent))
 	{
 		printf("create  parent  signal pipe error\n");	
@@ -123,7 +125,7 @@ void run_parent_process()
 	add_sig(SIGINT,sig_action);
 	add_sig(SIGPIPE,sig_action);
 	add_sig(SIGTERM,sig_action);
-	
+
 
 	add_epoll_fd(p_util.servers_fd);
 
@@ -136,8 +138,13 @@ void run_parent_process()
 	while(p_util.close_process)
 	{
 		get_num=epoll_wait(p_util.epoll_fd,all_event,MAX_LISTEN_NUM,-1);
+		printf("fd coming\n");
+		sleep(1);
 		for(i=0;i<get_num;i++)
 		{
+			printf("some fd reday\n");
+			if(!all_event[i].events&EPOLLIN)
+				continue;
 			if(all_event[i].data.fd==p_util.servers_fd)
 			{
 				size_t sendbuf=send(p_util.process_all[chose_server].pipe_conv[0],(char *)&send_temp,sizeof(send_temp),0);	
@@ -145,7 +152,9 @@ void run_parent_process()
 				{
 					printf("new connected send to child process failed\n");	
 				}
+				printf("main process recv a connect&&send to child pipe child:%d\n",chose_server);
 				chose_server=(chose_server+1)%CHILD_PROCESS_NUM;
+				continue;
 			}
 			else if(all_event[i].data.fd==m_pipe_parent[0])
 			{
@@ -162,42 +171,52 @@ void run_parent_process()
 					switch(sig[k])
 					{
 						case SIGCHLD:
-						{
-							pid_t e_pid;
-							int stat;
-							while((e_pid=waitpid(-1,&stat,WNOHANG))>0)
 							{
-								for(i=1;i<CHILD_PROCESS_NUM;i++)
+								pid_t e_pid;
+								int stat;
+								while((e_pid=waitpid(-1,&stat,WNOHANG))>0)
 								{
-									if(e_pid==p_util.process_all[i].pid)
+									for(i=1;i<CHILD_PROCESS_NUM;i++)
 									{
-										printf("close child process %d\n",e_pid);
-										close(p_util.process_all[i].pipe_conv[0]);
-										p_util.process_all[i].pid=-1;
+										if(e_pid==p_util.process_all[i].pid)
+										{
+											printf("close child process %d\n",e_pid);
+											close(p_util.process_all[i].pipe_conv[0]);
+											p_util.process_all[i].pid=-1;
+										}
+
 									}
-
 								}
+								p_util.close_process=false;
+
+
+
+								break;
 							}
-							p_util.close_process=false;
-
-
-
-							break;
-						}
 						case SIGTERM:
-						break;
-						case SIGINT:
-						{
-							printf("close all server\n");
-							for(i=0;i<CHILD_PROCESS_NUM;i++)
 							{
-								if(p_util.process_all[i].pid!=-1)
+								printf("main process exit\n");	
+								for(i=0;i<CHILD_PROCESS_NUM;i++)
 								{
-									kill(p_util.process_all[i].pid,SIGTERM);	
+									if(p_util.process_all[i].pid!=-1)
+									{
+										kill(p_util.process_all[i].pid,SIGTERM);	
+									}
 								}
 							}
-						}
-						break;
+							break;
+						case SIGINT:
+							{
+								printf("close all server\n");
+								for(i=0;i<CHILD_PROCESS_NUM;i++)
+								{
+									if(p_util.process_all[i].pid!=-1)
+									{
+										kill(p_util.process_all[i].pid,SIGTERM);	
+									}
+								}
+							}
+							break;
 					}
 					bzero(sig,1024);
 				}
@@ -228,6 +247,7 @@ void run_child_process()
 
 	}
 	add_epoll_fd(m_pipe_parent[0]);
+	add_epoll_fd(m_pipe_parent[1]);
 	setnonblocking(m_pipe_parent[1]);
 	add_sig(SIGCHLD,sig_action);
 	add_sig(SIGINT,sig_action);
@@ -241,8 +261,13 @@ void run_child_process()
 		get_num=epoll_wait(p_util.epoll_fd,all_event,MAX_LISTEN_NUM,-1);
 		for(i=0;i<get_num;i++)
 		{
+			if(all_event[i].data.fd==p_util.servers_fd)
+			{
+			printf("error child %d listen server_fd\n",p_util.m_index);	
+			}
 			if(all_event[i].data.fd==p_util.process_all[p_util.m_index].pipe_conv[1])
 			{
+				printf("child %d recv main process new connect request\n",p_util.m_index);
 				size_t recbuf=recv(p_util.process_all[p_util.m_index].pipe_conv[0],(char *)&recv_temp,sizeof(recv_temp),0);	
 				if(recbuf==-1)
 				{
@@ -275,27 +300,28 @@ void run_child_process()
 						switch(signals[k])
 						{
 							case SIGCHLD:
-							{
-								pid_t m_pid;
-								int stat;
-								while((m_pid=waitpid(-1,&stat,WNOHANG))>0)
 								{
-									continue;	
+									pid_t m_pid;
+									int stat;
+									while((m_pid=waitpid(-1,&stat,WNOHANG))>0)
+									{
+										continue;	
+									}
+									break;
+
 								}
-								break;
-								
-							}
 							case SIGTERM:
-							{
-
-								break;
-							}
+								{
+									p_util.close_process=false;
+									printf("child process exit\n");
+									break;
+								}
 							case SIGINT:
-							{
-								p_util.close_process=false;
+								{
+									p_util.close_process=false;
 
-								break;
-							}
+									break;
+								}
 
 
 
@@ -374,7 +400,7 @@ void add_sig(int sig)
 	{
 		printf("add sig failed\n");	
 	}
-	
+
 }
 void sig_action(int sig)
 {
@@ -391,5 +417,5 @@ void setnonblocking(int fd)
 	int old_char=fcntl(fd,F_GETFL);
 	int new_char=old_char|O_NONBLOCK;
 	fcntl(fd,F_SETFL,new_char);
-	
+
 }

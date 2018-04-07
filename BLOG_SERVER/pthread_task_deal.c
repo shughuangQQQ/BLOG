@@ -1,5 +1,5 @@
 #include"pthread_task_deal.h"
-
+#include<errno.h>
 void *add_task(pthread_pool_data* m_pthread_pool,int client_fd)
 {
 	printf("prepare to add client task\n");
@@ -212,20 +212,20 @@ pthread_pool_data *create_pthread_pool()
 	pthread_pool_data*m_pthread_pool=(pthread_pool_data*)malloc(sizeof(pthread_pool_data));	
 	if(NULL==m_pthread_pool)
 	{
-		printf("malloc failed\n");
+		printf("malloc failed pthreadpool%d\n",errno);
 	}
 	m_pthread_pool->tids=(pthread_t*)malloc(sizeof(pthread_t)*MAX_PTHREAD_NUM);
 		if(NULL==m_pthread_pool->tids)
 	{
-		printf("malloc failed\n");
+		printf("malloc pid failed\n");
 	}
 	memset(m_pthread_pool->tids,0,sizeof(m_pthread_pool->tids));
-	m_pthread_pool->tasks=(task_queue*)malloc(sizeof(task_queue)*MAX_TASK_NUM);
-	if(m_pthread_pool->tasks)
+	//m_pthread_pool->tasks=(task_queue*)malloc(sizeof(task_queue)*MAX_TASK_NUM);
+	/*if(m_pthread_pool->tasks)
 	{
-		printf("malloc error\n");
-	}
-	memset(m_pthread_pool->tasks,0,sizeof(m_pthread_pool->tasks));
+		printf("malloc task error ",errno);
+	}*/
+	//memset(m_pthread_pool->tasks,0,sizeof(m_pthread_pool->tasks));
 	pthread_mutex_init(&m_pthread_pool->thread_pool_count_lock,NULL);
 	pthread_cond_init(&m_pthread_pool->task_queue_not_empty_lock,NULL);
 	pthread_cond_init(&m_pthread_pool->task_queue_not_full_lock,NULL);

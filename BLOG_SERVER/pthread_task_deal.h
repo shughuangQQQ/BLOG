@@ -24,7 +24,7 @@ typedef struct node7
 typedef struct node6
 {
 	pthread_t *tids;
-	task_queue *tasks;
+	task_queue tasks[MAX_TASK_NUM];
 	pthread_cond_t task_queue_not_empty_lock;
 	pthread_cond_t task_queue_not_full_lock;
 	pthread_mutex_t thread_pool_data_lock;
