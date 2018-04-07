@@ -17,8 +17,8 @@
 #define SERVER_PORT 8020
 #define SERVER_IP_1 "127.0.0.1"
 #include"pthread_task_deal.h"
-#define MAX_LISTEN_NUM 100
-#define CHILD_PROCESS_NUM 5
+#define MAX_LISTEN_NUM 1024
+#define CHILD_PROCESS_NUM 1
 
 
 void run_parent_process();
@@ -72,25 +72,25 @@ int main()
 	{
 		printf("sock_bind failed errno%d\n",errno);	
 	}
-	p_util.servers_fd=server_fd;
 	if(-1==listen(server_fd,LISTEN))
 	{
 		printf("listen failed\n");	
 	}
+	p_util.servers_fd=server_fd;
 
 	creaete_process();
 	if(p_util.m_index==-1)
 	{
-		
+
 		p_util.epoll_fd=epoll_create(MAX_LISTEN_NUM);
 		run_parent_process();	
 	}
 	else
 	{
-		
+
 		p_util.epoll_fd=epoll_create(MAX_LISTEN_NUM);
 		printf("child run m_index:%d\n",p_util.m_index);
-		pthread_pool_data* childe_thread_pool=create_pthread_pool();
+		p_util.child_process_pool=create_pthread_pool();
 		run_child_process();	
 	}
 
@@ -133,16 +133,14 @@ void run_parent_process()
 	int get_num,i;
 	int chose_server=0;
 	struct epoll_event all_event[MAX_LISTEN_NUM];
-	int send_temp;
+	int send_temp=999;
 	int k;
 	while(p_util.close_process)
 	{
+		sleep(5);
 		get_num=epoll_wait(p_util.epoll_fd,all_event,MAX_LISTEN_NUM,-1);
-		printf("fd coming\n");
-		sleep(1);
 		for(i=0;i<get_num;i++)
 		{
-			printf("some fd reday\n");
 			if(!all_event[i].events&EPOLLIN)
 				continue;
 			if(all_event[i].data.fd==p_util.servers_fd)
@@ -230,7 +228,6 @@ void run_parent_process()
 		}
 
 
-
 	}
 
 }
@@ -247,7 +244,8 @@ void run_child_process()
 
 	}
 	add_epoll_fd(m_pipe_parent[0]);
-	add_epoll_fd(m_pipe_parent[1]);
+	add_epoll_fd(p_util.process_all[p_util.m_index].pipe_conv[1]);
+
 	setnonblocking(m_pipe_parent[1]);
 	add_sig(SIGCHLD,sig_action);
 	add_sig(SIGINT,sig_action);
@@ -258,25 +256,28 @@ void run_child_process()
 	int client_addr_size;
 	while(p_util.close_process)
 	{
+		sleep(5);
 		get_num=epoll_wait(p_util.epoll_fd,all_event,MAX_LISTEN_NUM,-1);
 		for(i=0;i<get_num;i++)
 		{
-			if(all_event[i].data.fd==p_util.servers_fd)
-			{
-			printf("error child %d listen server_fd\n",p_util.m_index);	
-			}
+			/*if(all_event[i].data.fd==p_util.servers_fd)
+			  {
+			  printf("error child %d listen server_fd\n",p_util.m_index);	
+			  }*/
 			if(all_event[i].data.fd==p_util.process_all[p_util.m_index].pipe_conv[1])
 			{
-				printf("child %d recv main process new connect request\n",p_util.m_index);
-				size_t recbuf=recv(p_util.process_all[p_util.m_index].pipe_conv[0],(char *)&recv_temp,sizeof(recv_temp),0);	
+				size_t recbuf=recv(p_util.process_all[p_util.m_index].pipe_conv[1],(char *)&recv_temp,sizeof(recv_temp),0);	
 				if(recbuf==-1)
 				{
-					printf("child process: new conected recv failed\n");	
+					printf("child process: new conected recv failed %d\n",errno);	
+					continue;
 				}
 				client_fd=accept(p_util.servers_fd,(struct sockaddr*)&client_addr,&client_addr_size);
 				if(-1==client_fd)
 				{
 					printf("recv client failed\n");	
+
+					continue;
 				}
 				add_epoll_fd(client_fd);
 
@@ -336,8 +337,20 @@ void run_child_process()
 			}
 			else if(all_event[i].events & EPOLLIN)
 			{
+				/*if(readlen==0)
+				{
+					printf("one client exit by accident\n");
+					epoll_ctl(p_util.epoll_fd,EPOLL_DEL,all_event[i].data.fd);
+				}*/
+
 				//todo with :deal with data;
 				add_task(p_util.child_process_pool,all_event[i].data.fd);
+				/*printf("child recv client mes\n");
+				char str[1024];
+				bzero(str,1024);
+				ssize_t readlen=read(all_event[i].data.fd,str,sizeof(str));*/
+				/*if(readn>0)
+					printf("%s\n",str);*/
 			}
 			else
 			{

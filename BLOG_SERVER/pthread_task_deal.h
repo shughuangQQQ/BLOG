@@ -10,7 +10,7 @@
 #include<pthread.h>
 #include<signal.h>
 #define SLEEP_TIME 10
-#define SCANNER_PTHREAD_POOL_TIME 10
+#define SCANNER_PTHREAD_POOL_TIME_ADJUST 10
 #define MIN_PTHREAD_NUM 5
 #define MAX_PTHREAD_NUM 100
 #define MAX_TASK_NUM 100
@@ -43,6 +43,5 @@ void pthread_pool_destory(pthread_pool_data* m_pool);
 void *pthread_adjust_fun(void *argv);
 pthread_pool_data *create_pthread_pool();
 void *add_task(pthread_pool_data* m_pthread_pool,int client_fd);
-
 
 #endif
