@@ -46,7 +46,6 @@ typedef struct node3
 void creaete_process();
 void add_epoll_fd(int fd);
 process_utils p_util;
-int client_fd=0;
 
 
 
@@ -90,7 +89,7 @@ int main()
 
 		p_util.epoll_fd=epoll_create(MAX_LISTEN_NUM);
 		printf("child run m_index:%d\n",p_util.m_index);
-		p_util.child_process_pool=create_pthread_pool();
+		p_util.child_process_pool=create_pthread_pool(p_util.epoll_fd);
 		run_child_process();	
 	}
 
@@ -238,6 +237,7 @@ void run_child_process()
 	int chose_server=0;
 	struct epoll_event all_event[MAX_LISTEN_NUM];
 	int recv_temp;
+	int client_fd;
 	if( -1==socketpair(AF_UNIX,SOCK_STREAM,0,m_pipe_parent))
 	{
 		printf("childe process signal pipe create failed\n");

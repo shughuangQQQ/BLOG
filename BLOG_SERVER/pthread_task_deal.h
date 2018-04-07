@@ -17,7 +17,7 @@
 #define DEFAULT_ADD 5
 typedef struct node7
 {
-	void * (*task_fun)(int client_fd);
+	void * (*task_fun)(int,int);
 	int fd;
 }task_queue;
 
@@ -36,12 +36,13 @@ typedef struct node6
 	int task_queue_front;
 	int task_num;
 	int is_shutdown;
+	int m_epollfd;
 }pthread_pool_data;
 void *pthread_fun(void *argv);
 int is_ALIVE(pid_t tid);
 void pthread_pool_destory(pthread_pool_data* m_pool);
 void *pthread_adjust_fun(void *argv);
-pthread_pool_data *create_pthread_pool();
+pthread_pool_data *create_pthread_pool(int);
 void *add_task(pthread_pool_data* m_pthread_pool,int client_fd);
 
 #endif

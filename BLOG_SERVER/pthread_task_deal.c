@@ -126,7 +126,7 @@ void *pthread_fun(void *argv)
 		m_pool->busy_thread++;
 		if(pthread_mutex_unlock(&m_pool->thread_pool_count_lock))
 		printf("lock error%d\n",errno);
-		(*(newtask.task_fun))(newtask.fd);
+		(*(newtask.task_fun))(newtask.fd,m_pool->m_epollfd);
 		if(pthread_mutex_lock(&m_pool->thread_pool_count_lock))
 		printf("lock error%d\n",errno);
 		m_pool->busy_thread--;
@@ -233,7 +233,7 @@ void *pthread_adjust_fun(void *argv)
 }
 
 
-pthread_pool_data *create_pthread_pool()
+pthread_pool_data *create_pthread_pool(int m_epoll_fd)
 {
 	//creat &&init thread struct(default num pthread)
 	pthread_pool_data*m_pthread_pool=(pthread_pool_data*)malloc(sizeof(pthread_pool_data));	
@@ -268,7 +268,7 @@ pthread_pool_data *create_pthread_pool()
 	m_pthread_pool->task_queue_front=0;
 	m_pthread_pool->task_queue_tail=0;
 	m_pthread_pool->task_num=0;
-
+	m_pthread_pool->m_epollfd=m_epoll_fd;
 	int i;
 	for(i=0;i<MIN_PTHREAD_NUM;i++)
 	{
