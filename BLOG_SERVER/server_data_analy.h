@@ -5,7 +5,7 @@
 #include<unistd.h>
 #define TEMPBUF 4096
 #include"PAC_INET.h"
-void deal_with_data(NET_PACK* pack);
+void deal_with_data(char *);
 void *analysedata(int client_fd,int m_epoll_fd);
 
 
