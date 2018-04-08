@@ -7,6 +7,7 @@
 #define PACK_TAIL char
 #define PACK_SIZE sizeof(NET_PACK)
 typedef enum {PACK_CHAR,PACK_ETC}PACK_TYPE;
+#include<errno.h>
 
 typedef enum {false ,true}bool;
 typedef struct node2

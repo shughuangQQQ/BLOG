@@ -1,5 +1,4 @@
 #include"pthread_task_deal.h"
-#include<errno.h>
 void *add_task(pthread_pool_data* m_pthread_pool,int client_fd)
 {
 	printf("prepare to add client task\n");

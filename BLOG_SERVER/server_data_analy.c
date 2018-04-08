@@ -1,5 +1,4 @@
 #include"server_data_analy.h"
-#include<errno.h>
 #include<sys/epoll.h>
 
 void *analysedata(int client_fd,int m_epoll_fd)
