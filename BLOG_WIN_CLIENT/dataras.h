@@ -2,22 +2,28 @@
 #define DATARAS_H
 
 #include <QObject>
+#include<qjsonobject.h>
+
 #include"q_tcp_util.h"
+
 class DataRAS :public QObject
 {
     Q_OBJECT
 public:
     DataRAS(Q_TCP_Util *tcpsoc);
     Q_TCP_Util *m_tcp;
-
+   // Deal_QJson m_dealjson;
     QString m_log_in_id;
     QString m_log_in_passward;
-    int SendToSocket(M_PACK*str);
+    int SendToSocket(QString);
 
-    int RecvFromSocket();
+    int RecvFromSocket(QJsonObject *m_json);
     ~ DataRAS();
 public slots:
     BOOL getin();
+private:
+
+
 };
 
 #endif // DATARAS_H

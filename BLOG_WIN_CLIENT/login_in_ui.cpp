@@ -28,3 +28,8 @@ void Login_in_UI::on_Login_clicked()
     qDebug() << "on_push_send_to util!";
     emit sendtoutil();
 }
+
+void Login_in_UI::on_SignUp_clicked()
+{
+
+}

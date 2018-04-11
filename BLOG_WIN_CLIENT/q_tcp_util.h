@@ -13,8 +13,8 @@ private:
 public:
      explicit Q_TCP_Util(QObject *parent = nullptr);
     ~Q_TCP_Util();
-    int f_send(M_PACK *m_pac);
-    int f_recv(M_PACK *m_pac);
+    int f_send(char *m_pac);
+    int f_recv(QJsonObject *m_pac);
 public:
     static Q_TCP_Util* CreateNetUtil();
 

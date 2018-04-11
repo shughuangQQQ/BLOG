@@ -18,8 +18,9 @@ Q_TCP_Util::Q_TCP_Util(QObject *parent) : QObject(parent)
      qDebug() << "Connect successfully!";
      return net_util;
 }
-int Q_TCP_Util::f_send(M_PACK *m_pac)
+int Q_TCP_Util::f_send(char *m_pac)
 {
+
     if(-1==this->client_socket->write((char *)m_pac,sizeof(m_pac)))
     {
         return 0;
@@ -27,7 +28,7 @@ int Q_TCP_Util::f_send(M_PACK *m_pac)
     }
     return 1;
 }
-int Q_TCP_Util::f_recv(M_PACK *m_pac)
+int Q_TCP_Util::f_recv(QJsonObject *m_pac)
 {
  if(-1==this->client_socket->write((char *)m_pac,sizeof(m_pac)))
  {

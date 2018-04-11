@@ -1,39 +1,43 @@
 #include "dataras.h"
-
+#include"deal_qjson.h"
 DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
 {
 this->m_tcp=tcpsoc;
 }
  BOOL DataRAS:: getin()
  {
-    M_PACK* m_pac=new M_PACK;
-    m_pac->pack_type=PACK_LOG;
+   // M_PACK* m_pac=new M_PACK;
 
-
-    strcpy_s(m_pac->pack_body,m_log_in_id.length(),(char *)m_log_in_id.data());
-    strcat_s(m_pac->pack_tail,m_log_in_id.length(),(char *)m_log_in_passward.data());
-    m_tcp->f_send(m_pac);
-    delete m_pac;
-            /* QString m_log_in_id;
-    QString m_log_in_passward;*/
-
+     QJsonObject *logjson;
+     logjson=Deal_QJson::CreateLogJson(m_log_in_id,m_log_in_passward);
+    //m_pac->pack_type=PACK_LOG;
+     QString sendbuf=Deal_QJson::JsonToStr(logjson);
+     delete logjson;
+     logjson=NULL;
      qDebug() << "util reciv!";
+     this->SendToSocket(sendbuf);
     return TRUE;
  }
  DataRAS::~DataRAS()
  {
 
  }
- int DataRAS::SendToSocket(M_PACK*str)
+
+
+ int DataRAS::SendToSocket(QString s_mes)
  {
-    if(1== this->m_tcp->f_recv(str))
+
+     char*  ch;
+     QByteArray ba = s_mes.toLatin1(); // must
+     ch=ba.data();
+    if(1== this->m_tcp->f_send(ch))
     {
         return 1;
     }
     else
      return 0;
  }
- int DataRAS::RecvFromSocket()
+ int DataRAS::RecvFromSocket(QJsonObject *m_json)
  {
 
      return 0;

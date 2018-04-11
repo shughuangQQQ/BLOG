@@ -21,6 +21,8 @@ private slots:
 
     void on_Login_clicked();
 
+    void on_SignUp_clicked();
+
 signals:
     void sendtoutil();
 private:

@@ -1,8 +1,8 @@
 #ifndef NET_PACK_H
 #define NET_PACK_H
 
-#define SERVER_IP "192.168.1.1"
-#define SERVER_PORT 8000
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8020
 #include <qdebug.h>
 typedef enum {PACK_LOG,PACK_CHAR,PACK_ETC}PACK_TYPE;
 
