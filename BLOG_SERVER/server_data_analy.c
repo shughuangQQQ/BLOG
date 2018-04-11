@@ -9,7 +9,7 @@ void *analysedata(int client_fd,int m_epoll_fd)
 	char* pack=(char *)malloc(PACK_SIZE);
 	bzero(pack,PACK_SIZE);
 	
-	if((read_buf=read(client_fd,(void *)pack,PACK_SIZE))>0)
+	if((read_buf=read(client_fd,pack,PACK_SIZE))>0)
 	{
 		printf("%s\n",pack);	
 		deal_with_data(pack,client_fd,m_epoll_fd);
@@ -32,6 +32,7 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 	PAC_CODE_FEED feed_code;	
 	if(!strcmp(Packs_type->valuestring,"login"))
 	{
+	
 		feed_code=get_pass_access(m_anly_json);
 		deal_feed_back(client_fd,feed_code,(char *)"login_feed");	
 	}

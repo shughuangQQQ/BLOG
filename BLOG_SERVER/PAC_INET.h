@@ -5,7 +5,7 @@
 #define TIAL_SIZE 1024
 #define PACK_BODY char
 #define PACK_TAIL char
-#define PACK_SIZE sizeof(NET_PACK)
+#define PACK_SIZE 4096
 typedef enum {PACK_CHAR,PACK_ETC}PACK_TYPE;
 #include<errno.h>
 #include"cJSON/cJSON.h"
