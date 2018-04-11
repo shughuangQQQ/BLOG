@@ -12,10 +12,11 @@ this->m_tcp=tcpsoc;
      logjson=Deal_QJson::CreateLogJson(m_log_in_id,m_log_in_passward);
     //m_pac->pack_type=PACK_LOG;
      QString sendbuf=Deal_QJson::JsonToStr(logjson);
+
+     this->SendToSocket(sendbuf);
      delete logjson;
      logjson=NULL;
-     qDebug() << "util reciv!";
-     this->SendToSocket(sendbuf);
+
     return TRUE;
  }
  DataRAS::~DataRAS()
@@ -30,11 +31,14 @@ this->m_tcp=tcpsoc;
      char*  ch;
      QByteArray ba = s_mes.toLatin1(); // must
      ch=ba.data();
+
     if(1== this->m_tcp->f_send(ch))
     {
+        qDebug()<<"send ok";
         return 1;
     }
     else
+      qDebug()<<"send error";
      return 0;
  }
  int DataRAS::RecvFromSocket(QJsonObject *m_json)

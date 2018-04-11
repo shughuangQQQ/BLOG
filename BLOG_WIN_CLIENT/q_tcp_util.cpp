@@ -20,8 +20,8 @@ Q_TCP_Util::Q_TCP_Util(QObject *parent) : QObject(parent)
 }
 int Q_TCP_Util::f_send(char *m_pac)
 {
-
-    if(-1==this->client_socket->write((char *)m_pac,sizeof(m_pac)))
+  qDebug()<<"111111"<<m_pac;
+    if(-1==this->client_socket->write((char *)m_pac,strlen(m_pac)))
     {
         return 0;
 

@@ -10,7 +10,9 @@ QJsonObject* Deal_QJson::CreateLogJson(QString user_id,QString user_passward)
     QJsonObject *logjson=new QJsonObject;
     personMessage.insert("id",user_id);
     personMessage.insert("passward",user_passward);
-    logjson->insert("logmessage",QJsonValue(personMessage));
+    logjson->insert("PACK_TYPE","login");
+    logjson->insert("User_Mes",QJsonValue(personMessage));
+
     return logjson;
 
 
@@ -26,7 +28,7 @@ QString Deal_QJson::JsonToStr(QJsonObject *m_json)
 
     QString strJson(byteArray);
 
-    qDebug() << strJson;
+   // qDebug() << strJson;
 
     //char*ch;
     //QByteArray ba = strJson.toLatin1();
