@@ -6,12 +6,12 @@ SOURCE:=$(notdir $(SOURCE2))
 OBJES:=$(patsubst %.c,%.o, $(SOURCE))
 MOBJES:=$(addprefix $(DIR),$(OBJES))
 $(DIR)$(EXE):$(MOBJES)
-	@$(CC) -o $@ $^ -lpthread -lm 
+	@$(CXX) -o $@ $^ -lpthread -lm 
 	@rm -rf $(DIR)*.o
 $(DIR)%.o:%.c
-	@$(CC) -o $@ -c $^
+	@$(CXX) -o $@ -c $^
 $(DIR)%.o:$(DIR2)%.c
-	@$(CC) -o $@ -c $^
+	@$(CXX) -o $@ -c $^
 .PHONY:clean rebuild
 clean:
 	@rm -rf $(DIR)*

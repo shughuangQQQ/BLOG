@@ -12,15 +12,13 @@
 #include<arpa/inet.h>
 #include<sys/stat.h>
 #include"PAC_INET.h"
-#define SERVER_PORT 8020
-#define SERVER_IP_1 "127.0.0.1"
 #include"pthread_task_deal.h"
 #define MAX_LISTEN_NUM 1024
 #define CHILD_PROCESS_NUM 1
 
 
 void run_parent_process();
-void add_sig();
+void add_sig(int);
 void sig_action(int sig);
 void run_child_process();
 void setnonblocking(int fd);
@@ -118,10 +116,10 @@ void run_parent_process()
 	}
 	add_epoll_fd(m_pipe_parent[0]);
 	setnonblocking(m_pipe_parent[1]);
-	add_sig(SIGCHLD,sig_action);
-	add_sig(SIGINT,sig_action);
-	add_sig(SIGPIPE,sig_action);
-	add_sig(SIGTERM,sig_action);
+	add_sig(SIGCHLD);
+	add_sig(SIGINT);
+	add_sig(SIGPIPE);
+	add_sig(SIGTERM);
 
 
 	add_epoll_fd(p_util.servers_fd);
@@ -142,6 +140,7 @@ void run_parent_process()
 				continue;
 			if(all_event[i].data.fd==p_util.servers_fd)
 			{
+				printf("parent recv con\n");
 				size_t sendbuf=send(p_util.process_all[chose_server].pipe_conv[0],(char *)&send_temp,sizeof(send_temp),0);	
 				if(sendbuf==-1)
 				{
@@ -245,13 +244,13 @@ void run_child_process()
 	add_epoll_fd(p_util.process_all[p_util.m_index].pipe_conv[1]);
 
 	setnonblocking(m_pipe_parent[1]);
-	add_sig(SIGCHLD,sig_action);
-	add_sig(SIGINT,sig_action);
-	add_sig(SIGPIPE,sig_action);
-	add_sig(SIGTERM,sig_action);
+	add_sig(SIGCHLD/*,sig_action*/);
+	add_sig(SIGINT);
+	add_sig(SIGPIPE);
+	add_sig(SIGTERM);
 
 	struct sockaddr_in client_addr;
-	int client_addr_size;
+	socklen_t client_addr_size;
 	while(p_util.close_process)
 	{
 		sleep(5);

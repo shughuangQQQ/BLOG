@@ -9,7 +9,9 @@
 typedef enum {PACK_CHAR,PACK_ETC}PACK_TYPE;
 #include<errno.h>
 #include"cJSON/cJSON.h"
-typedef enum {false ,true}bool;
+//typedef enum {false ,true}bool;
+#define SERVER_PORT 8020
+#define SERVER_IP_1 "192.168.41.128"
 typedef struct node2
 {
 	PACK_TYPE packtype;
@@ -17,6 +19,7 @@ typedef struct node2
 	PACK_TAIL packtail[TIAL_SIZE];
 	
 }NET_PACK;
+typedef enum m_typ{ID_UN_EXIST,SIGN_FIRST,PASSWARD_ERROR,LOG_SUCCESS        }PAC_CODE_FEED;
 
 
 #endif
