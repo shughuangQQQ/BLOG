@@ -20,6 +20,8 @@ typedef struct node2
 	
 }NET_PACK;
 typedef enum m_typ{ID_UN_EXIST,ID_EXIST,SIGN_FIRST,SIGN_UP_SUCCESS,PASSWARD_ERROR,LOG_SUCCESS ,NO_FRIEND,FOUCS_SUCCESS       }PAC_CODE_FEED;
-
+#define MAX_FRIEND 100
+#define MAX_NAME_LENGTH 15
+#define CONFIG_PATH "./SERVER_MESSAGE/server_config"
 
 #endif

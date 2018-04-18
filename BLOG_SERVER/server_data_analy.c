@@ -119,6 +119,12 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 		feed_code=push_person_mes(m_anly_json);
 		deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
 	}
+	else if(!strcmp(Packs_type->valuestring,"get_friend_static"))
+	{
+
+		feed_code=push_person_mes(m_anly_json);
+		deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
+	}
 
 	cJSON_Delete(m_anly_json);
 }
@@ -134,29 +140,141 @@ PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 	strcpy(user_path,"./SERVER_MESSAGE/");
 	strcat(user_path,GetId->valuestring);
 	strcat(user_path,".mes");
-	if(!(fd=fopen(user_path,"r+")))
+	FILE*fd,*fd2;
+	if(!(fd=fopen(user_path,"a")))
 	{
-		printf("fopen r+ error%d\n",errno);
+		printf("fopen a error%d\n",errno);
 		return ID_UN_EXIST;	
 	}
-
+	if(!(fd2=fopen(CONFIG_PATH,"r+")))
+	{
+		printf("fopen r error%d\n",errno);
+		
+	}
+	char read_list[1024];
+	if((EOF==fgets(read_list,1024,fd2)))
+		printf("error on read_list file %d\n",errno);
+	char *save_1=NULL;
+	char*first=strtok_r(read_list,"=",&save_1);
+	int listnum=atoi(save_1);
+	listnum++;
+	char str1[100];
 	char tempbuf[4096];
 	bzero(tempbuf);
-	char *m_data=getdata();
-	int staticofdata=0;
-	while(fgets(tempbuf,4096,fd))
-	{
-		if(strcmp(tempbuf,m_data)==0)
-			staticofdata=1;
+	itoa(listnum,tempbuf,10);
+	strcpy(tempbuf,first);
+	strcat(tempbuf,"=");
+	strcat(tempbuf,tempbuf);
 
+	if(!fseek(fd2,0,SEEK_SET))
+	{
+		printf("seek error %d\n",errno);
+		return ID_UN_EXIST;
 	}
-	if((staticofdata==0)&&(EOF==fputs(m_data,fd)))
-	printf("error on write new sign_up file %d\n",errno);
+	if((EOF==fputs(tempbuf,fd2)))
+		printf("error on write new sign_up file %d\n",errno);
+	fclose(fd2);
+	char *m_data=getdata();
+
+	char write1[1024];
+
+	//strcpy(write1,itoa());
+	if((EOF==fputs(tempbuf,fd)))
+		printf("error on write new sign_up file %d\n",errno);
+	if((EOF==fputs(m_data,fd)))
+		printf("error on write new sign_up file %d\n",errno);
 	if(EOF==fputs(AddPersonMes->valuestring,fd))
-	printf("error on write new sign_up file %d\n",errno);
+		printf("error on write new sign_up file %d\n",errno);
 	fclose(fd);
 	free(m_data);
 }
+
+PAC_CODE_FEED get_friend_static(cJSON*m_Json)
+{
+	cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
+	cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
+	cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
+	char user_path[256];
+	bzero(user_path,256);
+	FILE*fd;
+	strcpy(user_path,"./SERVER_MESSAGE/");
+	strcat(user_path,GetId->valuestring);
+	if(!(fd=fopen(user_path,"r")))
+	{
+		printf("fopen error%d\n",errno);
+		return ID_UN_EXIST;	
+	}//只返回三日内的动态
+	char *friend_list[MAX_FRIEND];
+	int i=0;
+	for (i=0;i<MAX_FRIEND;i++)
+	{
+		friend_list[i]=NULL;
+
+	}
+	char tempbuf[1024];
+	bzero(tempbuf,1024);
+	char *friendlist=NULL;
+	while(fgets(tempbuf,1024,fd))
+	{
+
+		char *savpoint=NULL;
+		char *us=strtok_r(tempbuf,"=",&savpoint);
+
+		if(strcmp(us,"friend")==0)
+		{
+			friendlist=strtok_r(NULL,"=",&savpoint);
+			fclose(fd);
+			break;
+		}
+		
+	}
+	i=0;
+	char *savpoint2=NULL;
+	char *getname_list=NULL;
+	while((getname_list=strtok_r(friendlist,",",&savpoint2)))
+	{
+		friend_list[i]=(char *)malloc(MAX_NAME_LENGTH);
+		bzero(friend_list[i],MAX_NAME_LENGTH);
+		strcpy(friend_list[i++],getname_list);
+	}
+	int h;
+	char *datastr=getdata();
+	char tempbuf2[4096];
+	for(h=0;h<i;h--)
+	{
+		bzero(user_path,256);
+
+		FILE*fd_friend;
+		strcpy(user_path,"./SERVER_MESSAGE/");
+		strcat(user_path,friend_list[h]);
+		strcat(user_path,".mes");
+		if(!(fd_friend=fopen(user_path,"r")))
+		{
+			printf("fopen error%d\n",errno);
+			
+		}
+		
+		while(fgets(tempbuf2,4096,fd_friend))
+		{
+			
+			
+
+		}
+
+
+
+		fclose(fd_friend);
+
+	}
+
+	free(datastr);
+	datastr=NULL;
+
+
+
+}
+
+
 PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 {
 	cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
