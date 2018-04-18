@@ -122,7 +122,7 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 
 	cJSON_Delete(m_anly_json);
 }
-PAC_CODE_FEED push_person_mes(cJSON*m_Json)
+PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 {
 
 	cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
@@ -150,7 +150,7 @@ PAC_CODE_FEED push_person_mes(cJSON*m_Json)
 			staticofdata=1;
 
 	}
-	if((staticofdata==1)&&(EOF==fputs(m_data,fd)))
+	if((staticofdata==0)&&(EOF==fputs(m_data,fd)))
 	printf("error on write new sign_up file %d\n",errno);
 	if(EOF==fputs(AddPersonMes->valuestring,fd))
 	printf("error on write new sign_up file %d\n",errno);
