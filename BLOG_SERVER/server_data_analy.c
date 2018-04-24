@@ -4,54 +4,54 @@
 #include<time.h>
 void remove_line(FILE*fp,int linenum,char *path)
 {
-	
+
 
 
 	char buf[4096];
 
 
 
-    int total_line = 0; // 记录文件总行数
-    int size = 0;       // 记录文件总大小
+	int total_line = 0; // 记录文件总行数
+	int size = 0;       // 记录文件总大小
 
-    while (fgets(buf, sizeof(buf), fp)) {  
-    	size += strlen(buf);
-    	total_line++;
-    }
+	while (fgets(buf, sizeof(buf), fp)) {  
+		size += strlen(buf);
+		total_line++;
+	}
 
-    // 如果要删除文件的行数大于文件总行数，退出程序
-    if (linenum > total_line) {
-    	printf("%d is greater than total_line!\n", linenum);
-    	return ;
-    }
-
-
-    int s = 0;      // 记录要删除行大小
-    int t = 0;      // 记录每一行大小
-    int i = 0;      // 记录当前行数
-    fseek(fp, 0L, SEEK_SET);    // 将文件指针移到文件头
-
-    // 将要删除行后的每一行前移一行
-    while (fgets(buf, sizeof(buf), fp)) {  
-
-    	i++;
-    	t = strlen(buf);
-
-    	if (i == linenum) {
-    		s = t;
-    	}
-
-    	if (i > linenum) {
-    		fseek(fp, -(s+t), SEEK_CUR);
-    		fputs(buf, fp);
-    		fseek(fp, s, SEEK_CUR);
-    	}
-    } 
-
-    truncate(path, size-s);  // 截断文件
+	// 如果要删除文件的行数大于文件总行数，退出程序
+	if (linenum > total_line) {
+		printf("%d is greater than total_line!\n", linenum);
+		return ;
+	}
 
 
-    return 0;
+	int s = 0;      // 记录要删除行大小
+	int t = 0;      // 记录每一行大小
+	int i = 0;      // 记录当前行数
+	fseek(fp, 0L, SEEK_SET);    // 将文件指针移到文件头
+
+	// 将要删除行后的每一行前移一行
+	while (fgets(buf, sizeof(buf), fp)) {  
+
+		i++;
+		t = strlen(buf);
+
+		if (i == linenum) {
+			s = t;
+		}
+
+		if (i > linenum) {
+			fseek(fp, -(s+t), SEEK_CUR);
+			fputs(buf, fp);
+			fseek(fp, s, SEEK_CUR);
+		}
+	} 
+
+	truncate(path, size-s);  // 截断文件
+
+
+	return ;
 }
 char *getdata()
 {
@@ -72,7 +72,7 @@ void *analysedata(int client_fd,int m_epoll_fd)
 	//NET_PACK* pack=(NET_PACK*)malloc(sizeof(NET_PACK));
 	char* pack=(char *)malloc(PACK_SIZE);
 	bzero(pack,PACK_SIZE);
-	
+
 	if((read_buf=read(client_fd,pack,PACK_SIZE))>0)
 	{
 		printf("%s\n",pack);	
@@ -90,7 +90,7 @@ void *analysedata(int client_fd,int m_epoll_fd)
 
 void deal_with_data(char* pack,int client_fd,int epollfd)
 {
-	
+
 	cJSON*m_anly_json=cJSON_Parse(pack);
 	//free(pack);
 	cJSON*Packs_type=cJSON_GetObjectItem(m_anly_json,"PACK_TYPE");
@@ -101,7 +101,7 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 		feed_code=get_pass_access(m_anly_json);
 		deal_feed_back(client_fd,feed_code,(char *)"login_feed");	
 	}
-	else if(!strcmp(Packs_type->valuestring,"sign_up"))
+	/*else if(!strcmp(Packs_type->valuestring,"sign_up"))
 	{
 
 		feed_code=sign_up_acess(m_anly_json);
@@ -124,18 +124,18 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 
 		feed_code=push_person_mes(m_anly_json);
 		deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
-	}
+	}*/
 
 	cJSON_Delete(m_anly_json);
 }
-PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
+/*PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 {
 
 	cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
 	cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
 	cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
 	cJSON*AddPersonMes=cJSON_GetObjectItem(m_Json,"Add_Mes_Static")
-	char user_path[256];
+		char user_path[256];
 	bzero(user_path,256);
 	strcpy(user_path,"./SERVER_MESSAGE/");
 	strcat(user_path,GetId->valuestring);
@@ -149,7 +149,7 @@ PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 	if(!(fd2=fopen(CONFIG_PATH,"r+")))
 	{
 		printf("fopen r error%d\n",errno);
-		
+
 	}
 	char read_list[1024];
 	if((EOF==fgets(read_list,1024,fd2)))
@@ -226,7 +226,7 @@ PAC_CODE_FEED get_friend_static(cJSON*m_Json)
 			fclose(fd);
 			break;
 		}
-		
+
 	}
 	i=0;
 	char *savpoint2=NULL;
@@ -251,13 +251,13 @@ PAC_CODE_FEED get_friend_static(cJSON*m_Json)
 		if(!(fd_friend=fopen(user_path,"r")))
 		{
 			printf("fopen error%d\n",errno);
-			
+
 		}
-		
+
 		while(fgets(tempbuf2,4096,fd_friend))
 		{
-			
-			
+
+
 
 		}
 
@@ -318,7 +318,7 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 		bzero(tempbuf,1024);
 	}
 	remove_line(fd,m_line,user_path);
-	
+
 	strcat(writebuf,",");
 	strcat(writebuf,friend_name);
 
@@ -326,7 +326,7 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 	{
 		printf("seek error %d\n",errno);
 	}
-	
+
 
 	if(EOF==fputs(writebuf,fd))
 	{
@@ -335,7 +335,7 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 	fclose(fd);
 	return FOUCS_SUCCESS;
 
-}
+}*/
 
 PAC_CODE_FEED get_pass_access(cJSON*LOG_MES)
 {
@@ -349,6 +349,7 @@ PAC_CODE_FEED get_pass_access(cJSON*LOG_MES)
 	strcat(user_path,GetId->valuestring);
 	if(!(fd=fopen(user_path,"r")))
 	{
+		printf("log error id doesent exist %s error code:%d\n",user_path,errno);
 		return ID_UN_EXIST;	
 	}
 	char tempbuf[1024];
@@ -366,13 +367,15 @@ PAC_CODE_FEED get_pass_access(cJSON*LOG_MES)
 	char *us=strtok_r(tempbuf,"=",&savpoint);
 	//char *pasward=strtok(NULL,"=",&savpoint2);
 	char *pasward=savpoint;
-	printf("%s\n",pasward);
-	if(!strcmp(pasward,GetPassward->valuestring))
+	//printf("server passward%s\n",pasward);
+	//printf("user passward%s\n",GetPassward->valuestring);
+	if(0!=strncmp(pasward,GetPassward->valuestring,strlen(pasward)-1))
 	{
+		printf("passward error\n%s\n%s\n",pasward,GetPassward->valuestring);
 		fclose(fd);
 		return PASSWARD_ERROR;	
 	}
-	
+
 
 	fclose(fd);
 	return LOG_SUCCESS;
@@ -396,7 +399,7 @@ void deal_feed_back(int client_fd,PAC_CODE_FEED feedback,char *pack_type,char* p
 	cJSON_Delete(con_pack);
 }
 
-PAC_CODE_FEED sign_up_acess(cJSON* SIGN_MES)
+/*PAC_CODE_FEED sign_up_acess(cJSON* SIGN_MES)
 {
 	cJSON*GetIDPAS=cJSON_GetObjectItem(SIGN_MES,"User_Mes");
 	cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
@@ -438,4 +441,4 @@ PAC_CODE_FEED sign_up_acess(cJSON* SIGN_MES)
 	return SIGN_UP_SUCCESS;
 
 
-}
+}*/
