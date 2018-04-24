@@ -18,23 +18,43 @@ Q_TCP_Util::Q_TCP_Util(QObject *parent) : QObject(parent)
      qDebug() << "Connect successfully!";
      return net_util;
 }
-int Q_TCP_Util::f_send(char *m_pac)
+int Q_TCP_Util::f_send(QString m_pac)
 {
   qDebug()<<"111111"<<m_pac;
-    if(-1==this->client_socket->write((char *)m_pac,strlen(m_pac)))
+
+   char*  ch;
+   QByteArray ba = m_pac.toLatin1(); // must
+   ch=ba.data();
+    if(-1==this->client_socket->write(ch))
     {
+
         return 0;
 
     }
+    if(this->client_socket->waitForBytesWritten())
+    {
+
+        return 1;
+    }
+
+
     return 1;
 }
-int Q_TCP_Util::f_recv(QJsonObject *m_pac)
+int Q_TCP_Util::f_recv(char * recvbuf)
 {
- if(-1==this->client_socket->write((char *)m_pac,sizeof(m_pac)))
- {
+
+     if(this->client_socket->waitForReadyRead())
+     {
+        client_socket->read(recvbuf,4096);
+        /* QDataStream in(this->client_socket);
+         in.setVersion(QDataStream::Qt_5_0);
+         in >> recvbuf;*/
+         qDebug()<<recvbuf;
+
+     }
      return 0;
 
- }
+
  return 1;
 }
 

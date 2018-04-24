@@ -18,6 +18,24 @@ QJsonObject* Deal_QJson::CreateLogJson(QString user_id,QString user_passward)
 
 
 }
+int Deal_QJson::StrToJson(QString m_recvbuf,QJsonDocument*jsonDoc)
+{
+    QJsonParseError jsonError;
+
+    *jsonDoc=QJsonDocument::fromJson(m_recvbuf.toLatin1(), &jsonError);
+
+  if(jsonError.error == QJsonParseError::NoError)
+    {
+        if((*jsonDoc).isObject())
+        {
+
+           return 1;
+        }
+
+    }
+    return 0;
+
+}
 QString Deal_QJson::JsonToStr(QJsonObject *m_json)
 {
     QJsonDocument document;

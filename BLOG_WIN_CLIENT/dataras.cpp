@@ -17,7 +17,33 @@ this->m_tcp=tcpsoc;
      delete logjson;
      logjson=NULL;
 
-    return TRUE;
+
+     QString m_recvbuf=this->RecvFromSocket();
+
+
+    QJsonDocument document;
+
+    Deal_QJson::StrToJson(m_recvbuf,&document);
+    QJsonObject object=document.object();
+    if (object.contains("PACK_TYPE"))
+    {
+            QJsonValue value = object.value("PACK_TYPE");
+            if (value.isString()) {
+                QString strType = value.toString();
+                qDebug() << "pack_TYPE : " << strType;
+            }
+
+    }
+    int nFrom=1;
+    if (object.contains("PACK_CODE_FEED")) {
+        QJsonValue value = object.value("PACK_CODE_FEED");
+        if (value.isDouble()) {
+            nFrom = value.toVariant().toInt();
+            qDebug() << "PACK_CODE_FEED : " << nFrom;
+        }
+    }
+    if(nFrom==LOG_SUCCESS)
+        return TRUE;
  }
  DataRAS::~DataRAS()
  {
@@ -28,11 +54,11 @@ this->m_tcp=tcpsoc;
  int DataRAS::SendToSocket(QString s_mes)
  {
 
-     char*  ch;
+    /* char*  ch;
      QByteArray ba = s_mes.toLatin1(); // must
-     ch=ba.data();
+     ch=ba.data();*/
 
-    if(1== this->m_tcp->f_send(ch))
+    if(1== this->m_tcp->f_send(s_mes))
     {
         qDebug()<<"send ok";
         return 1;
@@ -41,8 +67,15 @@ this->m_tcp=tcpsoc;
       qDebug()<<"send error";
      return 0;
  }
- int DataRAS::RecvFromSocket(QJsonObject *m_json)
+ QString DataRAS::RecvFromSocket()
  {
-
-     return 0;
+    char str[4096];
+    this->m_tcp->f_recv(str);
+    QString qstr = QString(QLatin1String(str));
+   /*  QString qstr = QString(QLatin1String(recvbuf));
+     QJsonObject*my_json=Deal_QJson::StrToJson(qstr);*/
+    for(int i=0;i<4096;i++)
+        str[i]='\0';
+     qDebug()<<qstr;
+     return qstr;
  }

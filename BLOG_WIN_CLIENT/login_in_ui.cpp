@@ -25,7 +25,7 @@ void Login_in_UI::on_Login_clicked()
     log_id=ui->m_ID->text();
     log_passward=ui->m_passward->text();
 
-    qDebug() << "on_push_send_to util!";
+
     emit sendtoutil();
 }
 

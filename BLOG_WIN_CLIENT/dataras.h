@@ -17,7 +17,7 @@ public:
     QString m_log_in_passward;
     int SendToSocket(QString);
 
-    int RecvFromSocket(QJsonObject *m_json);
+    QString RecvFromSocket();
     ~ DataRAS();
 public slots:
     BOOL getin();
