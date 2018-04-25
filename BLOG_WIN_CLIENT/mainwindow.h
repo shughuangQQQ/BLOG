@@ -21,6 +21,10 @@ public:
     ~MainWindow();
 
     UI_FLUSH_UTIL* m_util;
+private slots:
+    void on_pushButton_clicked();
+signals:
+    void BlogButtonPush();
 private:
     Ui::MainWindow *ui;
 };

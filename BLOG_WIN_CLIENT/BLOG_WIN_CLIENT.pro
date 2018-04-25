@@ -30,7 +30,8 @@ SOURCES += \
     ui_flush_util.cpp \
     login_in_ui.cpp \
     dataras.cpp \
-    deal_qjson.cpp
+    deal_qjson.cpp \
+    blog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -39,9 +40,11 @@ HEADERS += \
     ui_flush_util.h \
     login_in_ui.h \
     dataras.h \
-    deal_qjson.h
+    deal_qjson.h \
+    blog.h
 
 FORMS += \
         mainwindow.ui \
-    login_in_ui.ui
+    login_in_ui.ui \
+    blog.ui
 

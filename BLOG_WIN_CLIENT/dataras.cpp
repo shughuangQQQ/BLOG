@@ -2,7 +2,8 @@
 #include"deal_qjson.h"
 DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
 {
-this->m_tcp=tcpsoc;
+    this->m_tcp=tcpsoc;
+    getinBlag=false;
 }
  BOOL DataRAS:: getin()
  {
@@ -43,7 +44,13 @@ this->m_tcp=tcpsoc;
         }
     }
     if(nFrom==LOG_SUCCESS)
-        return TRUE;
+    {
+
+
+        this->getinBlag=true;
+         emit CloseLogUi();
+         return TRUE;
+    }
  }
  DataRAS::~DataRAS()
  {

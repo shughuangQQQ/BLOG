@@ -7,7 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    m_util=new UI_FLUSH_UTIL;
+    this->resize(500,700);
+    m_util=new UI_FLUSH_UTIL(this);
 
 
 
@@ -18,4 +19,9 @@ MainWindow::~MainWindow()
     if(m_util)
          delete m_util;
     delete ui;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    emit BlogButtonPush();
 }

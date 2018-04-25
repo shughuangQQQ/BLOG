@@ -19,9 +19,13 @@ public:
 
     QString RecvFromSocket();
     ~ DataRAS();
+public:
+    bool getinBlag;
 public slots:
     BOOL getin();
 private:
+signals:
+    void CloseLogUi();
 
 
 };
