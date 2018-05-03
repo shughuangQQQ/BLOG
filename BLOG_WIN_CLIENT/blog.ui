@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>Blog</class>
  <widget class="QWidget" name="Blog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>600</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -21,7 +29,7 @@
   <widget class="QPushButton" name="pushButton_2">
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>410</x>
      <y>10</y>
      <width>75</width>
      <height>23</height>
@@ -35,7 +43,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>480</y>
+     <y>570</y>
      <width>47</width>
      <height>16</height>
     </rect>

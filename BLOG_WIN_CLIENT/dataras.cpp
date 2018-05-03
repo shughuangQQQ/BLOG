@@ -5,6 +5,72 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
     this->m_tcp=tcpsoc;
     getinBlag=false;
 }
+ BOOL DataRAS::Get_PerSon(QString findId)
+ {
+      QJsonObject *findjson=Deal_QJson::CreateFindJson(findId);
+      QString sendbuf=Deal_QJson::JsonToStr(logjson);
+
+      this->SendToSocket(sendbuf);
+      delete findjson;
+      logjson=NULL;
+
+
+      QString m_recvbuf=this->RecvFromSocket();
+
+
+     QJsonDocument document;
+
+     Deal_QJson::StrToJson(m_recvbuf,&document);
+     QJsonObject object=document.object();
+     if (object.contains("PACK_TYPE"))
+     {
+             QJsonValue value = object.value("PACK_TYPE");
+             if (value.isString()) {
+                 QString strType = value.toString();
+                 qDebug() << "pack_TYPE : " << strType;
+             }
+
+     }
+    /* int nFrom=1;
+     if (object.contains("PACK_CODE_FEED")) {
+         QJsonValue value = object.value("PACK_CODE_FEED");
+         if (value.isDouble()) {
+             nFrom = value.toVariant().toInt();
+             qDebug() << "PACK_CODE_FEED : " << nFrom;
+         }
+     }
+     if(nFrom==LOG_SUCCESS)
+     {
+
+
+         this->getinBlag=true;
+          emit CloseLogUi();
+          return TRUE;
+     }*/
+  }
+  DataRAS::~DataRAS()
+  {
+
+  }
+
+
+  int DataRAS::SendToSocket(QString s_mes)
+  {
+
+     /* char*  ch;
+      QByteArray ba = s_mes.toLatin1(); // must
+      ch=ba.data();*/
+
+     if(1== this->m_tcp->f_send(s_mes))
+     {
+         qDebug()<<"send ok";
+         return 1;
+     }
+     else
+       qDebug()<<"send error";
+      return 0;
+
+ }
  BOOL DataRAS:: getin()
  {
    // M_PACK* m_pac=new M_PACK;

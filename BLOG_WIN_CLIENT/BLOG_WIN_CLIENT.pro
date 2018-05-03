@@ -31,7 +31,8 @@ SOURCES += \
     login_in_ui.cpp \
     dataras.cpp \
     deal_qjson.cpp \
-    blog.cpp
+    blog.cpp \
+    find_mes_input.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,10 +42,12 @@ HEADERS += \
     login_in_ui.h \
     dataras.h \
     deal_qjson.h \
-    blog.h
+    blog.h \
+    find_mes_input.h
 
 FORMS += \
         mainwindow.ui \
     login_in_ui.ui \
-    blog.ui
+    blog.ui \
+    find_mes_input.ui
 

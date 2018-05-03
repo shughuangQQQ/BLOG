@@ -12,8 +12,13 @@ UI_FLUSH_UTIL::UI_FLUSH_UTIL(QObject *parent) : QObject(parent)
    QObject::connect(m_dataras,SIGNAL(CloseLogUi()),this,SLOT(Ui_LOG_CLOSE()));
     QObject::connect(this->parent(),SIGNAL(BlogButtonPush()),this,SLOT(ShowBlogChildUi()));
    //QObject::connect(this,SIGNAL(()),m_dataras,SLOT(Ui_LOG_CLOSE()));
+   QObject::connect(this->parent(),SIGNAL(Send_Find_User_SIG()),this,SLOT(Show_Find_Widget()));
+   QObject::connect(m_find,SIGNAL(SendToServer()),this,SLOT(Send_Find_Json_ToServer()));
 }
+void UI_FLUSH_UTIL::Send_Find_Json_ToServer()
+{
 
+}
  UI_FLUSH_UTIL::~UI_FLUSH_UTIL()
  {
      if(m_tcp)
@@ -32,6 +37,8 @@ void UI_FLUSH_UTIL::getpass()
 
 
 }
+
+
 void UI_FLUSH_UTIL::Ui_LOG_CLOSE()
 {
     if(m_dataras->getinBlag==true)
@@ -46,4 +53,9 @@ void UI_FLUSH_UTIL::Ui_LOG_CLOSE()
 void UI_FLUSH_UTIL::ShowBlogChildUi()
 {
     this->m_blog_ui->show();
+}
+void UI_FLUSH_UTIL::Show_Find_Widget()
+{
+    this->m_find=new Find_Mes_Input;
+    this->m_find->show();
 }
