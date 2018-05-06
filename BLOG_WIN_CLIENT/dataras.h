@@ -23,9 +23,13 @@ public:
     bool getinBlag;
 public slots:
     BOOL getin();
+    BOOL Get_PerSon(QString);
+    void F_USER_FOUCS(QString);
 private:
 signals:
+    void FOCUS_SEND();
     void CloseLogUi();
+    void USER_FIND(int);
 
 
 };

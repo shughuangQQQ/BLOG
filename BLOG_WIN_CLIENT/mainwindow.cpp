@@ -25,3 +25,8 @@ void MainWindow::on_pushButton_clicked()
 {
     emit BlogButtonPush();
 }
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    emit Send_Find_User_SIG();
+}

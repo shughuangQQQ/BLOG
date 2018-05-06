@@ -8,11 +8,11 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
  BOOL DataRAS::Get_PerSon(QString findId)
  {
       QJsonObject *findjson=Deal_QJson::CreateFindJson(findId);
-      QString sendbuf=Deal_QJson::JsonToStr(logjson);
-
+      QString sendbuf=Deal_QJson::JsonToStr(findjson);
+       qDebug()<<sendbuf;
       this->SendToSocket(sendbuf);
       delete findjson;
-      logjson=NULL;
+      findjson=NULL;
 
 
       QString m_recvbuf=this->RecvFromSocket();
@@ -22,16 +22,17 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
 
      Deal_QJson::StrToJson(m_recvbuf,&document);
      QJsonObject object=document.object();
-     if (object.contains("PACK_TYPE"))
+   /*  if (object.contains("PACK_TYPE"))
      {
-             QJsonValue value = object.value("PACK_TYPE");
+             QJsonValue value = object.value("PACK_CODE_FEED");
              if (value.isString()) {
                  QString strType = value.toString();
-                 qDebug() << "pack_TYPE : " << strType;
+                 qDebug() << "PACK_CODE_FEED : " << strType;
+                 if(strType=="")
              }
 
-     }
-    /* int nFrom=1;
+     }*/
+     int nFrom=0;
      if (object.contains("PACK_CODE_FEED")) {
          QJsonValue value = object.value("PACK_CODE_FEED");
          if (value.isDouble()) {
@@ -39,21 +40,26 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
              qDebug() << "PACK_CODE_FEED : " << nFrom;
          }
      }
-     if(nFrom==LOG_SUCCESS)
-     {
 
+        emit USER_FIND(nFrom);
 
-         this->getinBlag=true;
-          emit CloseLogUi();
-          return TRUE;
-     }*/
   }
   DataRAS::~DataRAS()
   {
 
   }
 
+ void DataRAS::F_USER_FOUCS(QString foucus_id)
+ {
+  QJsonObject *Foucs_Json=Deal_QJson::CreateFoucsJson(foucus_id,m_log_in_id);
+   QString sendbuf=Deal_QJson::JsonToStr(Foucs_Json);
+   this->SendToSocket(sendbuf);
+   delete Foucs_Json;
+   Foucs_Json=NULL;
+   emit FOCUS_SEND();
 
+
+ }
   int DataRAS::SendToSocket(QString s_mes)
   {
 
@@ -118,28 +124,8 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
          return TRUE;
     }
  }
- DataRAS::~DataRAS()
- {
-
- }
 
 
- int DataRAS::SendToSocket(QString s_mes)
- {
-
-    /* char*  ch;
-     QByteArray ba = s_mes.toLatin1(); // must
-     ch=ba.data();*/
-
-    if(1== this->m_tcp->f_send(s_mes))
-    {
-        qDebug()<<"send ok";
-        return 1;
-    }
-    else
-      qDebug()<<"send error";
-     return 0;
- }
  QString DataRAS::RecvFromSocket()
  {
     char str[4096];
