@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 #include "dataras.h"
 #include"deal_qjson.h"
 DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
@@ -140,4 +138,3 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
      qDebug()<<qstr;
      return qstr;
  }
->>>>>>> 4f5da78201977928f90c765dcf1265f651b9f350

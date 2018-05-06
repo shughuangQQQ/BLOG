@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 #ifndef FIND_MES_INPUT_H
 #define FIND_MES_INPUT_H
 
@@ -36,4 +34,3 @@ signals:
 };
 
 #endif // FIND_MES_INPUT_H
->>>>>>> 4f5da78201977928f90c765dcf1265f651b9f350

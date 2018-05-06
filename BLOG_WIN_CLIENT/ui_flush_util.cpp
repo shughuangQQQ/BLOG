@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 #include "ui_flush_util.h"
 #include <QMessageBox>
 UI_FLUSH_UTIL::UI_FLUSH_UTIL(QObject *parent) : QObject(parent)
@@ -69,4 +67,3 @@ void UI_FLUSH_UTIL::Show_Find_Widget()
 
     this->m_find->show();
 }
->>>>>>> 4f5da78201977928f90c765dcf1265f651b9f350

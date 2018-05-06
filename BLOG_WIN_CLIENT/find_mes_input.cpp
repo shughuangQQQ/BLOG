@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 #include "find_mes_input.h"
 #include "ui_find_mes_input.h"
 #include"net_pack.h"
@@ -54,4 +52,3 @@ void Find_Mes_Input::on_pushButton_3_clicked()
 {
 
 }*/
->>>>>>> 4f5da78201977928f90c765dcf1265f651b9f350
