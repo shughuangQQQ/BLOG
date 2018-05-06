@@ -14,6 +14,9 @@ public:
      static QJsonObject* CreateLogJson(QString,QString);
      static  QString JsonToStr(QJsonObject* m_json);
      static int StrToJson(QString m_recvbuf,QJsonDocument*jsonDoc);
+     static QJsonObject* CreateFindJson(QString);
+
+     static QJsonObject* CreateFoucsJson(QString,QString);
 signals:
 
 public slots:

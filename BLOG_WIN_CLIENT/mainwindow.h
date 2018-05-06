@@ -23,8 +23,11 @@ public:
     UI_FLUSH_UTIL* m_util;
 private slots:
     void on_pushButton_clicked();
+    void on_pushButton_3_clicked();
+
 signals:
     void BlogButtonPush();
+    void Send_Find_User_SIG();
 private:
     Ui::MainWindow *ui;
 };

@@ -4,6 +4,29 @@ Deal_QJson::Deal_QJson(QObject *parent) : QObject(parent)
 {
 
 }
+QJsonObject* Deal_QJson::CreateFindJson(QString find_id)
+{
+
+     QJsonObject JsonPack;
+    QJsonObject *findjson=new QJsonObject;
+    JsonPack.insert("find",find_id);
+    findjson->insert("PACK_TYPE","FIND");
+    findjson->insert("FIND_MES",QJsonValue(JsonPack));
+
+   return findjson;
+}
+ QJsonObject* Deal_QJson::CreateFoucsJson(QString foucus_id,QString m_id)
+{
+
+    QJsonObject *foucus_json=new QJsonObject;
+
+
+    foucus_json->insert("PACK_TYPE","FOCUS");
+    foucus_json->insert("id",m_id);
+    foucus_json->insert("focus_id",foucus_id);
+    return foucus_json;
+
+}
 QJsonObject* Deal_QJson::CreateLogJson(QString user_id,QString user_passward)
 {
     QJsonObject personMessage;
