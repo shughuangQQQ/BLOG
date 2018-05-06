@@ -87,7 +87,20 @@ void *analysedata(int client_fd,int m_epoll_fd)
 	}
 
 }
+PAC_CODE_FEED Get_Find_User(cJSON* m_object)
+{
+	cJSON*FINDMES=cJSON_GetObjectItem(m_object,"FIND_MES");
+	cJSON*FIND_ID=cJSON_GetObjectItem(FINDMES,"find");
+	printf("%s\n",FIND_ID->valuestring);
+	char path[1024];
+	bzero(path,1024);
+	strcpy(path,"./SERVER_MESSAGE/");
+	strcat(path,FIND_ID->valuestring);
+	if(-1==access(path,F_OK))
+		return ID_UN_EXIST;
+	return ID_EXIST;
 
+}
 void deal_with_data(char* pack,int client_fd,int epollfd)
 {
 
@@ -101,18 +114,25 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 		feed_code=get_pass_access(m_anly_json);
 		deal_feed_back(client_fd,feed_code,(char *)"login_feed");	
 	}
+	else if(!strcmp(Packs_type->valuestring,"FIND"))
+	{
+		
+		feed_code=Get_Find_User(m_anly_json); 
+		deal_feed_back(client_fd,feed_code,(char *)"FIND_FEED");	
+		
+	}
 	/*else if(!strcmp(Packs_type->valuestring,"sign_up"))
 	{
 
 		feed_code=sign_up_acess(m_anly_json);
 		deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
-	}
-	else if(!strcmp(Packs_type->valuestring,"focus_friends"))
+	}*/
+	else if(!strcmp(Packs_type->valuestring,"FOCUS"))
 	{
 
 		feed_code=foucus_on_friend(m_anly_json);
-		deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
-	}
+		//deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
+	}/*
 	else if(!strcmp(Packs_type->valuestring,"push_person_static"))
 	{
 
@@ -273,14 +293,11 @@ PAC_CODE_FEED get_friend_static(cJSON*m_Json)
 
 
 }
-
-
+*/
 PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 {
-	cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
-	cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
-	cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
-	cJSON*GetAddFriend=cJSON_GetObjectItem(m_Json,"Foucs_Friend");
+	cJSON*GetId=cJSON_GetObjectItem(m_Json,"id");
+	cJSON*GetAddFriend=cJSON_GetObjectItem(m_Json,"focus_id");
 	int m_line=0;
 	char *friend_name=GetAddFriend->valuestring;
 	char user_path[256];
@@ -308,7 +325,7 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 		if(strcmp(us,"friend")==0)
 		{
 
-			if(!fseek(fd,0,SEEK_SET))
+			if(-1==fseek(fd,0,SEEK_SET))
 			{
 				printf("seek error %d\n",errno);
 				return ID_UN_EXIST;
@@ -319,10 +336,10 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 	}
 	remove_line(fd,m_line,user_path);
 
-	strcat(writebuf,",");
+	writebuf[strlen(writebuf)-1]=',';
 	strcat(writebuf,friend_name);
 
-	if(!fseek(fd,0,SEEK_END))
+	if(-1==fseek(fd,0,SEEK_END))
 	{
 		printf("seek error %d\n",errno);
 	}
@@ -335,7 +352,7 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 	fclose(fd);
 	return FOUCS_SUCCESS;
 
-}*/
+}
 
 PAC_CODE_FEED get_pass_access(cJSON*LOG_MES)
 {
