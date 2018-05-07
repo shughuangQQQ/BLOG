@@ -2,6 +2,25 @@
 #include<sys/epoll.h>
 #include<string.h>
 #include<time.h>
+#include<sys/types.h>
+#include<sys/file.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<stdlib.h>
+void m_strcpy(char *str1,char *str2)
+{
+	int i=0,j=0;
+	for(i=0;i<strlen(str2);i++)
+	{
+	if(str2[i]=='\\')
+	{	
+		continue;
+	}
+	str1[j++]=str2[i];
+	
+	}
+	printf("str1::%s\n",str1);
+}
 void remove_line(FILE*fp,int linenum,char *path)
 {
 
@@ -116,184 +135,255 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 	}
 	else if(!strcmp(Packs_type->valuestring,"FIND"))
 	{
-		
+
 		feed_code=Get_Find_User(m_anly_json); 
 		deal_feed_back(client_fd,feed_code,(char *)"FIND_FEED");	
-		
+
 	}
 	/*else if(!strcmp(Packs_type->valuestring,"sign_up"))
-	{
+	  {
 
-		feed_code=sign_up_acess(m_anly_json);
-		deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
-	}*/
+	  feed_code=sign_up_acess(m_anly_json);
+	  deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
+	  }*/
 	else if(!strcmp(Packs_type->valuestring,"FOCUS"))
 	{
 
 		feed_code=foucus_on_friend(m_anly_json);
 		//deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
 	}/*
-	else if(!strcmp(Packs_type->valuestring,"push_person_static"))
-	{
+		else if(!strcmp(Packs_type->valuestring,"push_person_static"))
+		{
 
 		feed_code=push_person_mes(m_anly_json);
 		deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
+		}
+		else if(!strcmp(Packs_type->valuestring,"get_friend_static"))
+		{
+
+		feed_code=push_person_mes(m_anly_json);
+		deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
+		}*/
+	else if(!strcmp(Packs_type->valuestring,"MeMes"))
+	{
+		cJSON* body_pack=cJSON_CreateObject();
+		feed_code=Get_Myself_Mes(m_anly_json,body_pack);
+		deal_feed_back(client_fd,feed_code,(char *)"MeMes_FEED",NULL,body_pack);	
+		//cJSON_Delete(body_pack);
+
+
 	}
-	else if(!strcmp(Packs_type->valuestring,"get_friend_static"))
-	{
-
-		feed_code=push_person_mes(m_anly_json);
-		deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
-	}*/
 
 	cJSON_Delete(m_anly_json);
 }
-/*PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
+PAC_CODE_FEED Get_Myself_Mes(cJSON* m_Json,cJSON *body_pack)
 {
 
-	cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
-	cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
-	cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
-	cJSON*AddPersonMes=cJSON_GetObjectItem(m_Json,"Add_Mes_Static")
-		char user_path[256];
-	bzero(user_path,256);
-	strcpy(user_path,"./SERVER_MESSAGE/");
-	strcat(user_path,GetId->valuestring);
-	strcat(user_path,".mes");
-	FILE*fd,*fd2;
-	if(!(fd=fopen(user_path,"a")))
-	{
-		printf("fopen a error%d\n",errno);
-		return ID_UN_EXIST;	
-	}
-	if(!(fd2=fopen(CONFIG_PATH,"r+")))
-	{
-		printf("fopen r error%d\n",errno);
-
-	}
-	char read_list[1024];
-	if((EOF==fgets(read_list,1024,fd2)))
-		printf("error on read_list file %d\n",errno);
-	char *save_1=NULL;
-	char*first=strtok_r(read_list,"=",&save_1);
-	int listnum=atoi(save_1);
-	listnum++;
-	char str1[100];
-	char tempbuf[4096];
-	bzero(tempbuf);
-	itoa(listnum,tempbuf,10);
-	strcpy(tempbuf,first);
-	strcat(tempbuf,"=");
-	strcat(tempbuf,tempbuf);
-
-	if(!fseek(fd2,0,SEEK_SET))
-	{
-		printf("seek error %d\n",errno);
-		return ID_UN_EXIST;
-	}
-	if((EOF==fputs(tempbuf,fd2)))
-		printf("error on write new sign_up file %d\n",errno);
-	fclose(fd2);
-	char *m_data=getdata();
-
-	char write1[1024];
-
-	//strcpy(write1,itoa());
-	if((EOF==fputs(tempbuf,fd)))
-		printf("error on write new sign_up file %d\n",errno);
-	if((EOF==fputs(m_data,fd)))
-		printf("error on write new sign_up file %d\n",errno);
-	if(EOF==fputs(AddPersonMes->valuestring,fd))
-		printf("error on write new sign_up file %d\n",errno);
-	fclose(fd);
-	free(m_data);
-}
-
-PAC_CODE_FEED get_friend_static(cJSON*m_Json)
-{
-	cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
-	cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
-	cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
+	cJSON*GetId=cJSON_GetObjectItem(m_Json,"id");
 	char user_path[256];
 	bzero(user_path,256);
+	char tempbuf[1024];
+	bzero(tempbuf,1024);
+
 	FILE*fd;
+	char *get_mes[4]={(char*)"fans_num",(char *)"friend_num",(char *)"blogitem_num",(char *)"Brief"};
+	int fannum=0;
+	int friendnum=0;
+	int blogitem_num=0;
+	char Brief[256];
+	bzero(Brief,256);
 	strcpy(user_path,"./SERVER_MESSAGE/");
 	strcat(user_path,GetId->valuestring);
-	if(!(fd=fopen(user_path,"r")))
+	if(!(fd=fopen(user_path,"r+")))
 	{
 		printf("fopen error%d\n",errno);
 		return ID_UN_EXIST;	
-	}//只返回三日内的动态
-	char *friend_list[MAX_FRIEND];
-	int i=0;
-	for (i=0;i<MAX_FRIEND;i++)
-	{
-		friend_list[i]=NULL;
-
 	}
-	char tempbuf[1024];
-	bzero(tempbuf,1024);
-	char *friendlist=NULL;
+	if(0!=(flock(fd->_fileno,LOCK_EX)))
+		printf("file already lock,waite for unlock\n");
+	int i=0,j=0;
 	while(fgets(tempbuf,1024,fd))
 	{
 
 		char *savpoint=NULL;
 		char *us=strtok_r(tempbuf,"=",&savpoint);
-
-		if(strcmp(us,"friend")==0)
+		for(i=j;i<4;i++)
 		{
-			friendlist=strtok_r(NULL,"=",&savpoint);
-			fclose(fd);
-			break;
+			if(strncmp(us,get_mes[i],strlen(get_mes[i]))==0)
+			{
+				printf("find::%s\n",get_mes[i]);
+				j++;
+				if(i==0)			
+					fannum=atoi(savpoint);
+				else if(i==1)
+					friendnum=atoi(savpoint);
+				else if(i==2)
+					blogitem_num=atoi(savpoint);
+				else if(i==3)
+					strcpy(Brief,savpoint);
+			}
 		}
-
 	}
-	i=0;
-	char *savpoint2=NULL;
-	char *getname_list=NULL;
-	while((getname_list=strtok_r(friendlist,",",&savpoint2)))
+
+
+	fclose(fd);
+	flock(fd->_fileno,LOCK_UN);
+
+	cJSON_AddNumberToObject(body_pack,"fans_num",fannum);
+	cJSON_AddNumberToObject(body_pack,"friend_num",friendnum);
+	cJSON_AddNumberToObject(body_pack,"blogitem_num",blogitem_num);
+	cJSON_AddStringToObject(body_pack,"Brief",Brief);
+	//char *ch=cJSON_PrintUnformatted(body_pack);
+	//m_strcpy(m_mes,ch);
+	//cJSON_Delete(body_pack);
+	return FOUCS_SUCCESS;
+}
+/*PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
+  {
+
+  cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
+  cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
+  cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
+  cJSON*AddPersonMes=cJSON_GetObjectItem(m_Json,"Add_Mes_Static")
+  char user_path[256];
+  bzero(user_path,256);
+  strcpy(user_path,"./SERVER_MESSAGE/");
+  strcat(user_path,GetId->valuestring);
+  strcat(user_path,".mes");
+  FILE*fd,*fd2;
+  if(!(fd=fopen(user_path,"a")))
+  {
+  printf("fopen a error%d\n",errno);
+  return ID_UN_EXIST;	
+  }
+  if(!(fd2=fopen(CONFIG_PATH,"r+")))
+  {
+  printf("fopen r error%d\n",errno);
+
+  }
+  char read_list[1024];
+  if((EOF==fgets(read_list,1024,fd2)))
+  printf("error on read_list file %d\n",errno);
+  char *save_1=NULL;
+  char*first=strtok_r(read_list,"=",&save_1);
+  int listnum=atoi(save_1);
+  listnum++;
+  char str1[100];
+  char tempbuf[4096];
+  bzero(tempbuf);
+  itoa(listnum,tempbuf,10);
+  strcpy(tempbuf,first);
+  strcat(tempbuf,"=");
+  strcat(tempbuf,tempbuf);
+
+  if(!fseek(fd2,0,SEEK_SET))
+  {
+  printf("seek error %d\n",errno);
+  return ID_UN_EXIST;
+  }
+  if((EOF==fputs(tempbuf,fd2)))
+  printf("error on write new sign_up file %d\n",errno);
+  fclose(fd2);
+  char *m_data=getdata();
+
+  char write1[1024];
+
+//strcpy(write1,itoa());
+if((EOF==fputs(tempbuf,fd)))
+printf("error on write new sign_up file %d\n",errno);
+if((EOF==fputs(m_data,fd)))
+printf("error on write new sign_up file %d\n",errno);
+if(EOF==fputs(AddPersonMes->valuestring,fd))
+printf("error on write new sign_up file %d\n",errno);
+fclose(fd);
+free(m_data);
+}
+
+PAC_CODE_FEED get_friend_static(cJSON*m_Json)
+{
+cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
+cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
+cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
+char user_path[256];
+bzero(user_path,256);
+FILE*fd;
+strcpy(user_path,"./SERVER_MESSAGE/");
+strcat(user_path,GetId->valuestring);
+if(!(fd=fopen(user_path,"r")))
+{
+	printf("fopen error%d\n",errno);
+	return ID_UN_EXIST;	
+}//只返回三日内的动态
+char *friend_list[MAX_FRIEND];
+int i=0;
+for (i=0;i<MAX_FRIEND;i++)
+{
+	friend_list[i]=NULL;
+
+}
+char tempbuf[1024];
+bzero(tempbuf,1024);
+char *friendlist=NULL;
+while(fgets(tempbuf,1024,fd))
+{
+
+	char *savpoint=NULL;
+	char *us=strtok_r(tempbuf,"=",&savpoint);
+
+	if(strcmp(us,"friend")==0)
 	{
-		friend_list[i]=(char *)malloc(MAX_NAME_LENGTH);
-		bzero(friend_list[i],MAX_NAME_LENGTH);
-		strcpy(friend_list[i++],getname_list);
+		friendlist=strtok_r(NULL,"=",&savpoint);
+		fclose(fd);
+		break;
 	}
-	int h;
-	char *datastr=getdata();
-	char tempbuf2[4096];
-	for(h=0;h<i;h--)
+
+}
+i=0;
+char *savpoint2=NULL;
+char *getname_list=NULL;
+while((getname_list=strtok_r(friendlist,",",&savpoint2)))
+{
+	friend_list[i]=(char *)malloc(MAX_NAME_LENGTH);
+	bzero(friend_list[i],MAX_NAME_LENGTH);
+	strcpy(friend_list[i++],getname_list);
+}
+int h;
+char *datastr=getdata();
+char tempbuf2[4096];
+for(h=0;h<i;h--)
+{
+	bzero(user_path,256);
+
+	FILE*fd_friend;
+	strcpy(user_path,"./SERVER_MESSAGE/");
+	strcat(user_path,friend_list[h]);
+	strcat(user_path,".mes");
+	if(!(fd_friend=fopen(user_path,"r")))
 	{
-		bzero(user_path,256);
-
-		FILE*fd_friend;
-		strcpy(user_path,"./SERVER_MESSAGE/");
-		strcat(user_path,friend_list[h]);
-		strcat(user_path,".mes");
-		if(!(fd_friend=fopen(user_path,"r")))
-		{
-			printf("fopen error%d\n",errno);
-
-		}
-
-		while(fgets(tempbuf2,4096,fd_friend))
-		{
-
-
-
-		}
-
-
-
-		fclose(fd_friend);
+		printf("fopen error%d\n",errno);
 
 	}
 
-	free(datastr);
-	datastr=NULL;
+	while(fgets(tempbuf2,4096,fd_friend))
+	{
+
+
+
+	}
+
+
+
+	fclose(fd_friend);
+
+}
+
+free(datastr);
+datastr=NULL;
 
 
 
 }
-*/
+	*/
 PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 {
 	cJSON*GetId=cJSON_GetObjectItem(m_Json,"id");
@@ -314,6 +404,8 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 	bzero(tempbuf,1024);
 	char writebuf[1024];
 	bzero(writebuf,1024);
+	if(0!=(flock(fd->_fileno,LOCK_EX)))
+		printf("file already lock,waite for unlock\n");
 	while(fgets(tempbuf,1024,fd))
 	{
 
@@ -349,7 +441,9 @@ PAC_CODE_FEED foucus_on_friend(cJSON*m_Json)
 	{
 		printf("error on write new sign_up file %d\n",errno);
 	}
+
 	fclose(fd);
+	flock(fd->_fileno,LOCK_UN);
 	return FOUCS_SUCCESS;
 
 }
@@ -364,13 +458,19 @@ PAC_CODE_FEED get_pass_access(cJSON*LOG_MES)
 	FILE*fd;
 	strcpy(user_path,"./SERVER_MESSAGE/");
 	strcat(user_path,GetId->valuestring);
+	if(-1==access(user_path,F_OK))
+		return ID_UN_EXIST;
+	char tempbuf[1024];
+	bzero(tempbuf,1024);
 	if(!(fd=fopen(user_path,"r")))
 	{
 		printf("log error id doesent exist %s error code:%d\n",user_path,errno);
 		return ID_UN_EXIST;	
 	}
-	char tempbuf[1024];
-	bzero(tempbuf,1024);
+	if(0!=flock(fd->_fileno,LOCK_EX))
+	{
+		printf("lock errno%d\n",errno);
+	}
 
 	if(NULL==fgets(tempbuf,1024,fd))
 	{
@@ -378,6 +478,9 @@ PAC_CODE_FEED get_pass_access(cJSON*LOG_MES)
 
 		return SIGN_FIRST;	
 	}
+	fclose(fd);
+	flock(fd->_fileno,LOCK_UN);
+
 	char *savpoint=NULL;
 	//char *savpoint1=NULL;
 	//char *savpoint2=NULL;
@@ -389,27 +492,32 @@ PAC_CODE_FEED get_pass_access(cJSON*LOG_MES)
 	if(0!=strncmp(pasward,GetPassward->valuestring,strlen(pasward)-1))
 	{
 		printf("passward error\n%s\n%s\n",pasward,GetPassward->valuestring);
-		fclose(fd);
 		return PASSWARD_ERROR;	
 	}
 
 
-	fclose(fd);
 	return LOG_SUCCESS;
 }
-void deal_feed_back(int client_fd,PAC_CODE_FEED feedback,char *pack_type,char* pack_body)
+void deal_feed_back(int client_fd,PAC_CODE_FEED feedback,char *pack_type,char* pack_body,cJSON*json_body)
 {
 	cJSON* con_pack=cJSON_CreateObject();
 	cJSON_AddStringToObject(con_pack,"PACK_TYPE",pack_type);
-	if(pack_body==NULL)
+	if(pack_body==NULL&&json_body==NULL)
 		cJSON_AddStringToObject(con_pack,"PACK_BODY","NULL");
-	else
+	else if(json_body!=NULL)
+		cJSON_AddItemToObject(con_pack,"PACK_BODY",json_body);
+	else 
 		cJSON_AddStringToObject(con_pack,"PACK_BODY",pack_body);
+
 	cJSON_AddNumberToObject(con_pack,"PACK_CODE_FEED",feedback);
 	char *ch=cJSON_PrintUnformatted(con_pack);
-	printf("send:%s to client\n",ch);
+	//char send_ch[4096];
+	//bzero(send_ch,4096);
+	
+	//m_strcpy(send_ch,ch);
+	printf("send:%s to client\n",/*send_*/ch);
 	ssize_t writewords;
-	if((writewords=write(client_fd,ch,strlen(ch)))==-1)
+	if((writewords=write(client_fd,/*send_*/ch,strlen(/*send_*/ch)))==-1)
 	{
 		printf("write to client error:%d\n",errno);	
 	}
@@ -417,45 +525,45 @@ void deal_feed_back(int client_fd,PAC_CODE_FEED feedback,char *pack_type,char* p
 }
 
 /*PAC_CODE_FEED sign_up_acess(cJSON* SIGN_MES)
-{
-	cJSON*GetIDPAS=cJSON_GetObjectItem(SIGN_MES,"User_Mes");
-	cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
-	cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
+  {
+  cJSON*GetIDPAS=cJSON_GetObjectItem(SIGN_MES,"User_Mes");
+  cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
+  cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
 
 
-	char user_path[256];
-	bzero(user_path,256);
-	FILE*fd;
-	strcpy(user_path,"./SERVER_MESSAGE/");
-	strcat(user_path,GetId->valuestring);
-	if((fd=fopen(user_path,"r")))
-	{
-		fclose(fd);
-		return ID_EXIST;	
-	}
-	if(!(fd=fopen(user_path,"a")))
-	{
+  char user_path[256];
+  bzero(user_path,256);
+  FILE*fd;
+  strcpy(user_path,"./SERVER_MESSAGE/");
+  strcat(user_path,GetId->valuestring);
+  if((fd=fopen(user_path,"r")))
+  {
+  fclose(fd);
+  return ID_EXIST;	
+  }
+  if(!(fd=fopen(user_path,"a")))
+  {
 
-		printf("open error %d\n",errno);
-	}
-	char *userid=GetId->valuestring;
-	char *pasward=GetPassward->valuestring;
-	char writetemp_buf[1024];
-	bzero(writetemp_buf,1024);
-	strcpy(writetemp_buf,userid);
-	strcpy(writetemp_buf,"=");
-	strcpy(writetemp_buf,passward);
+  printf("open error %d\n",errno);
+  }
+  char *userid=GetId->valuestring;
+  char *pasward=GetPassward->valuestring;
+  char writetemp_buf[1024];
+  bzero(writetemp_buf,1024);
+  strcpy(writetemp_buf,userid);
+  strcpy(writetemp_buf,"=");
+  strcpy(writetemp_buf,passward);
 
-	if(EOF==fputs(writetemp_buf,fd))
-	{
-		printf("error on write new sign_up file %d\n",errno);
-	}
-	if(EOF==fputs("friend=shugh",fd))
-	{
-		printf("error on write new sign_up file %d\n",errno);
-	}
-	fclose(fd);
-	return SIGN_UP_SUCCESS;
+  if(EOF==fputs(writetemp_buf,fd))
+  {
+  printf("error on write new sign_up file %d\n",errno);
+  }
+  if(EOF==fputs("friend=shugh",fd))
+  {
+  printf("error on write new sign_up file %d\n",errno);
+  }
+  fclose(fd);
+  return SIGN_UP_SUCCESS;
 
 
-}*/
+  }*/
