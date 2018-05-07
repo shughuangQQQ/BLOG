@@ -25,6 +25,7 @@ private slots:
 
 signals:
     void sendtoutil();
+   void  show_sign_up_window();
 private:
 
     Ui::Login_in_UI *ui;

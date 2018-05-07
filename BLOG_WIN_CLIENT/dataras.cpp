@@ -43,12 +43,90 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
 
         emit USER_FIND(nFrom);
 
-  }
+}
   DataRAS::~DataRAS()
   {
 
   }
+void DataRAS::RequestSelfMes()
+{
+    QJsonObject *MeRequestJson=Deal_QJson::CreateRequestMeMesJson(m_log_in_id);
+    QString sendbuf=Deal_QJson::JsonToStr(MeRequestJson);
+     qDebug()<<sendbuf;
+    this->SendToSocket(sendbuf);
+    delete MeRequestJson;
+    MeRequestJson=NULL;
 
+
+    QString m_recvbuf=this->RecvFromSocket();
+
+
+   QJsonDocument document;
+
+   Deal_QJson::StrToJson(m_recvbuf,&document);
+   QJsonObject object=document.object();
+   int fans_num;
+   int friend_num;
+   int blogitem_num;
+   QString Brief;
+
+   if (object.contains("PACK_BODY"))
+   {
+           QJsonValue value = object.value("PACK_BODY");
+
+           if (value.isObject()) {
+               QJsonObject m_obj=value.toObject();
+                    if(m_obj.contains("fans_num"))
+                    {
+                         QJsonValue value0 = m_obj.value("fans_num");
+                         if (value0.isDouble()) {
+                             fans_num = value0.toVariant().toInt();
+
+                         }
+                    }
+                    if(m_obj.contains("friend_num"))
+                    {
+                        QJsonValue value1 = m_obj.value("friend_num");
+                        if (value1.isDouble()) {
+                            friend_num = value1.toVariant().toInt();
+
+                        }
+                    }
+                    if(m_obj.contains("blogitem_num"))
+                    {
+                        QJsonValue value2 = m_obj.value("blogitem_num");
+                        if (value2.isDouble()) {
+                            blogitem_num = value2.toVariant().toInt();
+
+                        }
+                    }
+                    if(m_obj.contains("Brief"))
+                    {
+                        QJsonValue value3 = m_obj.value("Brief");
+                        if (value3.isString()) {
+                            Brief = value3.toString();
+
+                        }
+                    }
+           }
+           /* if (value.isString())
+            {
+                qDebug()<<value.toString();
+
+
+            }*/
+   }
+   /*int nFrom=0;
+   if (object.contains("PACK_CODE_FEED")) {
+       QJsonValue value = object.value("PACK_CODE_FEED");
+       if (value.isDouble()) {
+           nFrom = value.toVariant().toInt();
+           qDebug() << "PACK_CODE_FEED : " << nFrom;
+       }
+   }*/
+    emit sendtoMeForm(fans_num,friend_num,blogitem_num,Brief);
+
+}
  void DataRAS::F_USER_FOUCS(QString foucus_id)
  {
   QJsonObject *Foucs_Json=Deal_QJson::CreateFoucsJson(foucus_id,m_log_in_id);
@@ -57,7 +135,7 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
    delete Foucs_Json;
    Foucs_Json=NULL;
    emit FOCUS_SEND();
-
+    //emit
 
  }
   int DataRAS::SendToSocket(QString s_mes)
@@ -129,6 +207,8 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
  QString DataRAS::RecvFromSocket()
  {
     char str[4096];
+    for(int i=0;i<4096;i++)
+        str[i]='\0';
     this->m_tcp->f_recv(str);
     QString qstr = QString(QLatin1String(str));
    /*  QString qstr = QString(QLatin1String(recvbuf));

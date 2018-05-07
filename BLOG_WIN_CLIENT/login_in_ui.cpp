@@ -33,5 +33,5 @@ void Login_in_UI::on_Login_clicked()
 
 void Login_in_UI::on_SignUp_clicked()
 {
-
+    emit show_sign_up_window();
 }

@@ -30,3 +30,11 @@ void MainWindow::on_pushButton_3_clicked()
 {
     emit Send_Find_User_SIG();
 }
+
+void MainWindow::on_pushButton_4_clicked()//me widget
+{
+    if(this->m_util->m_meui->m_blog_item_num==-1)
+        emit MeFormRequestServer();
+    emit MeFormIniSet();
+    emit MeButtonPush();
+}

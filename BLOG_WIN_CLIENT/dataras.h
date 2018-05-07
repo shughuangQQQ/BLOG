@@ -25,11 +25,13 @@ public slots:
     BOOL getin();
     BOOL Get_PerSon(QString);
     void F_USER_FOUCS(QString);
+   void RequestSelfMes();
 private:
 signals:
     void FOCUS_SEND();
     void CloseLogUi();
     void USER_FIND(int);
+   void sendtoMeForm(int,int,int,QString);
 
 
 };

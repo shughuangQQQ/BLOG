@@ -15,7 +15,7 @@ public:
      static  QString JsonToStr(QJsonObject* m_json);
      static int StrToJson(QString m_recvbuf,QJsonDocument*jsonDoc);
      static QJsonObject* CreateFindJson(QString);
-
+    static QJsonObject* CreateRequestMeMesJson(QString);
      static QJsonObject* CreateFoucsJson(QString,QString);
 signals:
 

@@ -32,7 +32,9 @@ SOURCES += \
     dataras.cpp \
     deal_qjson.cpp \
     blog.cpp \
-    find_mes_input.cpp
+    find_mes_input.cpp \
+    signupform.cpp \
+    meform.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,11 +45,15 @@ HEADERS += \
     dataras.h \
     deal_qjson.h \
     blog.h \
-    find_mes_input.h
+    find_mes_input.h \
+    signupform.h \
+    meform.h
 
 FORMS += \
         mainwindow.ui \
     login_in_ui.ui \
     blog.ui \
-    find_mes_input.ui
+    find_mes_input.ui \
+    signupform.ui \
+    meform.ui
 

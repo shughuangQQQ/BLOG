@@ -3,11 +3,13 @@
 UI_FLUSH_UTIL::UI_FLUSH_UTIL(QObject *parent) : QObject(parent)
 {
     m_blog_ui=new Blog((QWidget*)this->parent());
+    m_meui=new MeForm((QWidget*)this->parent());
     m_logui=new Login_in_UI;
    m_tcp=Q_TCP_Util::CreateNetUtil();
    m_dataras=new DataRAS(m_tcp);
    this->m_find=new Find_Mes_Input;
     m_blog_ui->hide();
+    m_meui->hide();
    QObject::connect(m_logui,SIGNAL(sendtoutil()),this,SLOT(getpass()));
    QObject::connect(this,SIGNAL(sendtoNetUtil()),m_dataras,SLOT(getin()));
    QObject::connect(m_dataras,SIGNAL(CloseLogUi()),this,SLOT(Ui_LOG_CLOSE()));
@@ -16,13 +18,27 @@ UI_FLUSH_UTIL::UI_FLUSH_UTIL(QObject *parent) : QObject(parent)
    QObject::connect(this->parent(),SIGNAL(Send_Find_User_SIG()),this,SLOT(Show_Find_Widget()));
    QObject::connect(m_find,SIGNAL(SendToServer(QString)),m_dataras,SLOT(Get_PerSon(QString)));
 
+   QObject::connect(m_logui,SIGNAL(show_sign_up_window()),this,SLOT(Show_Sign_Widget()));//todo
    QObject::connect(m_dataras,SIGNAL(USER_FIND(int)),m_find,SLOT(F_USER_FIND(int)));
 
   QObject::connect(m_find,SIGNAL(FOUCS_USER(QString)),m_dataras,SLOT(F_USER_FOUCS(QString)));
    QObject::connect(m_dataras,SIGNAL(FOCUS_SEND()),this,SLOT(FOCUS_OK()));
 
-}
+   QObject::connect(this->parent(),SIGNAL(MeFormRequestServer()),m_dataras,SLOT(RequestSelfMes()));
 
+   QObject::connect(this->parent(),SIGNAL(MeFormIniSet()),m_meui,SLOT(me_setmes()));
+
+   QObject::connect(this->parent(),SIGNAL(MeButtonPush()),this,SLOT(ShowMeForm()));
+    QObject::connect(m_dataras,SIGNAL(sendtoMeForm(int,int,int,QString)),m_meui,SLOT(SetAllMes(int,int,int,QString)));
+
+
+}
+ void UI_FLUSH_UTIL::Show_Sign_Widget()
+ {
+     //todo
+
+
+ }
  UI_FLUSH_UTIL::~UI_FLUSH_UTIL()
  {
      if(m_tcp)
@@ -42,7 +58,6 @@ void UI_FLUSH_UTIL::getpass()
 
 }
 
-
 void UI_FLUSH_UTIL::Ui_LOG_CLOSE()
 {
     if(m_dataras->getinBlag==true)
@@ -54,6 +69,11 @@ void UI_FLUSH_UTIL::Ui_LOG_CLOSE()
 
 
 }
+ void UI_FLUSH_UTIL::ShowMeForm()
+ {
+    this->m_meui->show();
+
+ }
 void UI_FLUSH_UTIL::ShowBlogChildUi()
 {
     this->m_blog_ui->show();

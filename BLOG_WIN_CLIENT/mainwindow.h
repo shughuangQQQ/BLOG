@@ -25,9 +25,14 @@ private slots:
     void on_pushButton_clicked();
     void on_pushButton_3_clicked();
 
+    void on_pushButton_4_clicked();
+
 signals:
     void BlogButtonPush();
+     void MeButtonPush();
+      void MeFormIniSet();
     void Send_Find_User_SIG();
+   void  MeFormRequestServer();
 private:
     Ui::MainWindow *ui;
 };

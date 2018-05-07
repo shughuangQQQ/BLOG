@@ -27,6 +27,19 @@ QJsonObject* Deal_QJson::CreateFindJson(QString find_id)
     return foucus_json;
 
 }
+QJsonObject* Deal_QJson::CreateRequestMeMesJson(QString user_id)
+{
+
+    QJsonObject *personMessage=new QJsonObject;
+     personMessage->insert("PACK_TYPE","MeMes");
+    personMessage->insert("id",user_id);
+
+
+
+
+    return personMessage;
+
+}
 QJsonObject* Deal_QJson::CreateLogJson(QString user_id,QString user_passward)
 {
     QJsonObject personMessage;
