@@ -41,3 +41,8 @@ void MeForm::me_setmes()
 
    QString m_mysunb_mes=new QString("null");*/
 }
+
+void MeForm::on_pushButton_clicked()
+{
+    emit Push_Me_Static(ui->lineEdit->text());
+}

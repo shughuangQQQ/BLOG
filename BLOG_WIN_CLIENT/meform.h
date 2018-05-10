@@ -20,6 +20,9 @@ private:
 private slots:
     void me_setmes();
     void SetAllMes(int,int,int,QString);
+    void on_pushButton_clicked();
+signals:
+     void Push_Me_Static(QString);
 public:
     int m_fans_num;
     int m_focus_num;

@@ -15,6 +15,18 @@ QJsonObject* Deal_QJson::CreateFindJson(QString find_id)
 
    return findjson;
 }
+ QJsonObject* Deal_QJson::CreatePush_StaticJson(QString push_mes,QString m_id)
+{
+
+     QJsonObject *pushjson=new QJsonObject;
+
+
+     pushjson->insert("PACK_TYPE","push_static");
+     pushjson->insert("id",m_id);
+     pushjson->insert("push_mes",push_mes);
+     return pushjson;
+
+}
  QJsonObject* Deal_QJson::CreateFoucsJson(QString foucus_id,QString m_id)
 {
 

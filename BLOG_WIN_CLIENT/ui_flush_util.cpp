@@ -30,7 +30,7 @@ UI_FLUSH_UTIL::UI_FLUSH_UTIL(QObject *parent) : QObject(parent)
 
    QObject::connect(this->parent(),SIGNAL(MeButtonPush()),this,SLOT(ShowMeForm()));
     QObject::connect(m_dataras,SIGNAL(sendtoMeForm(int,int,int,QString)),m_meui,SLOT(SetAllMes(int,int,int,QString)));
-
+ QObject::connect(m_meui,SIGNAL(Push_Me_Static(QString)),m_dataras,SLOT(Push_Person_Static(QString)));
 
 }
  void UI_FLUSH_UTIL::Show_Sign_Widget()

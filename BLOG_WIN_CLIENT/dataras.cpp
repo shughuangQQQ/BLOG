@@ -1,5 +1,6 @@
 #include "dataras.h"
 #include"deal_qjson.h"
+#include<QMessageBox>
 DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
 {
     this->m_tcp=tcpsoc;
@@ -46,6 +47,16 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
 }
   DataRAS::~DataRAS()
   {
+
+  }
+  void  DataRAS::Push_Person_Static(QString push_mes)
+  {
+       QJsonObject *Push_Static_Json=Deal_QJson::CreatePush_StaticJson(push_mes,this->m_log_in_id);
+         QString sendbuf=Deal_QJson::JsonToStr(Push_Static_Json);
+         this->SendToSocket(sendbuf);
+         delete Push_Static_Json;
+         Push_Static_Json=NULL;
+         QMessageBox::about(NULL, "Push", "Push OK!");
 
   }
 void DataRAS::RequestSelfMes()

@@ -26,6 +26,7 @@ public slots:
     BOOL Get_PerSon(QString);
     void F_USER_FOUCS(QString);
    void RequestSelfMes();
+  void Push_Person_Static(QString);
 private:
 signals:
     void FOCUS_SEND();

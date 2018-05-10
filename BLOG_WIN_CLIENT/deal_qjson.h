@@ -17,6 +17,7 @@ public:
      static QJsonObject* CreateFindJson(QString);
     static QJsonObject* CreateRequestMeMesJson(QString);
      static QJsonObject* CreateFoucsJson(QString,QString);
+     static  QJsonObject* CreatePush_StaticJson(QString,QString);
 signals:
 
 public slots:
