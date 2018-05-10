@@ -12,12 +12,12 @@ void m_strcpy(char *str1,char *str2)
 	int i=0,j=0;
 	for(i=0;i<strlen(str2);i++)
 	{
-	if(str2[i]=='\\')
-	{	
-		continue;
-	}
-	str1[j++]=str2[i];
-	
+		if(str2[i]=='\\')
+		{	
+			continue;
+		}
+		str1[j++]=str2[i];
+
 	}
 	printf("str1::%s\n",str1);
 }
@@ -151,13 +151,13 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 
 		feed_code=foucus_on_friend(m_anly_json);
 		//deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
-	}/*
-		else if(!strcmp(Packs_type->valuestring,"push_person_static"))
-		{
+	}
+	else if(!strcmp(Packs_type->valuestring,"push_static"))
+	{
 
 		feed_code=push_person_mes(m_anly_json);
-		deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
-		}
+		//deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
+	}/*
 		else if(!strcmp(Packs_type->valuestring,"get_friend_static"))
 		{
 
@@ -238,142 +238,172 @@ PAC_CODE_FEED Get_Myself_Mes(cJSON* m_Json,cJSON *body_pack)
 	//cJSON_Delete(body_pack);
 	return FOUCS_SUCCESS;
 }
-/*PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
-  {
-
-  cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
-  cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
-  cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
-  cJSON*AddPersonMes=cJSON_GetObjectItem(m_Json,"Add_Mes_Static")
-  char user_path[256];
-  bzero(user_path,256);
-  strcpy(user_path,"./SERVER_MESSAGE/");
-  strcat(user_path,GetId->valuestring);
-  strcat(user_path,".mes");
-  FILE*fd,*fd2;
-  if(!(fd=fopen(user_path,"a")))
-  {
-  printf("fopen a error%d\n",errno);
-  return ID_UN_EXIST;	
-  }
-  if(!(fd2=fopen(CONFIG_PATH,"r+")))
-  {
-  printf("fopen r error%d\n",errno);
-
-  }
-  char read_list[1024];
-  if((EOF==fgets(read_list,1024,fd2)))
-  printf("error on read_list file %d\n",errno);
-  char *save_1=NULL;
-  char*first=strtok_r(read_list,"=",&save_1);
-  int listnum=atoi(save_1);
-  listnum++;
-  char str1[100];
-  char tempbuf[4096];
-  bzero(tempbuf);
-  itoa(listnum,tempbuf,10);
-  strcpy(tempbuf,first);
-  strcat(tempbuf,"=");
-  strcat(tempbuf,tempbuf);
-
-  if(!fseek(fd2,0,SEEK_SET))
-  {
-  printf("seek error %d\n",errno);
-  return ID_UN_EXIST;
-  }
-  if((EOF==fputs(tempbuf,fd2)))
-  printf("error on write new sign_up file %d\n",errno);
-  fclose(fd2);
-  char *m_data=getdata();
-
-  char write1[1024];
-
-//strcpy(write1,itoa());
-if((EOF==fputs(tempbuf,fd)))
-printf("error on write new sign_up file %d\n",errno);
-if((EOF==fputs(m_data,fd)))
-printf("error on write new sign_up file %d\n",errno);
-if(EOF==fputs(AddPersonMes->valuestring,fd))
-printf("error on write new sign_up file %d\n",errno);
-fclose(fd);
-free(m_data);
-}
-
-PAC_CODE_FEED get_friend_static(cJSON*m_Json)
-{
-cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
-cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
-cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
-char user_path[256];
-bzero(user_path,256);
-FILE*fd;
-strcpy(user_path,"./SERVER_MESSAGE/");
-strcat(user_path,GetId->valuestring);
-if(!(fd=fopen(user_path,"r")))
-{
-	printf("fopen error%d\n",errno);
-	return ID_UN_EXIST;	
-}//只返回三日内的动态
-char *friend_list[MAX_FRIEND];
-int i=0;
-for (i=0;i<MAX_FRIEND;i++)
-{
-	friend_list[i]=NULL;
-
-}
-char tempbuf[1024];
-bzero(tempbuf,1024);
-char *friendlist=NULL;
-while(fgets(tempbuf,1024,fd))
+PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 {
 
-	char *savpoint=NULL;
-	char *us=strtok_r(tempbuf,"=",&savpoint);
-
-	if(strcmp(us,"friend")==0)
-	{
-		friendlist=strtok_r(NULL,"=",&savpoint);
-		fclose(fd);
-		break;
-	}
-
-}
-i=0;
-char *savpoint2=NULL;
-char *getname_list=NULL;
-while((getname_list=strtok_r(friendlist,",",&savpoint2)))
-{
-	friend_list[i]=(char *)malloc(MAX_NAME_LENGTH);
-	bzero(friend_list[i],MAX_NAME_LENGTH);
-	strcpy(friend_list[i++],getname_list);
-}
-int h;
-char *datastr=getdata();
-char tempbuf2[4096];
-for(h=0;h<i;h--)
-{
+	cJSON*GetId=cJSON_GetObjectItem(m_Json,"id");
+	cJSON*GetPushMes=cJSON_GetObjectItem(m_Json,"push_mes");
+	char user_path[256];
 	bzero(user_path,256);
-
-	FILE*fd_friend;
 	strcpy(user_path,"./SERVER_MESSAGE/");
-	strcat(user_path,friend_list[h]);
-	strcat(user_path,".mes");
-	if(!(fd_friend=fopen(user_path,"r")))
+	strcat(user_path,GetId->valuestring);
+	//strcat(user_path,".mes");
+	FILE*fd;
+	if(-1==access(user_path,F_OK))
+		return ID_UN_EXIST;
+	if(!(fd=fopen(user_path,"r+")))
 	{
-		printf("fopen error%d\n",errno);
+		printf("fopen r error%d\n",errno);
 
 	}
-
-	while(fgets(tempbuf2,4096,fd_friend))
+	if(0!=(flock(fd->_fileno,LOCK_EX)))
+		printf("file already lock,waite for unlock\n");
+	char tempbuf[1024];
+	bzero(tempbuf,1024);
+	
+	int blog_num_line=0;
+	int num=0;
+	int i;
+	char temnum[10];
+	bzero(temnum,10);
+	while(fgets(tempbuf,1024,fd))
 	{
+	printf("%s\n",tempbuf);	
+		blog_num_line++;
+		char *savpoint=NULL;
+		char *us=strtok_r(tempbuf,"=",&savpoint);
+		
+		if(0==strncmp(us,"blogitem_num",strlen("blogitem_num")))
+		{
+			printf("find\n");
+			for(i=0;savpoint[i]!='\n';i++)
+			{
+				temnum[i]=savpoint[i];	
+			}
+			num=atoi(temnum);
+			num++;
+			bzero(temnum,10);
+			sprintf(temnum,"%d",num);
 
 
+			if(-1==fseek(fd,0,SEEK_SET))
+			{
+				printf("seek error %d\n",errno);
+
+				return ID_UN_EXIST;
+			}
+			break;
+		}
 
 	}
+	if(num==0)
+		return ID_UN_EXIST;
+	printf("blog_num_line %d\n",blog_num_line);
+	remove_line(fd,blog_num_line,user_path);
+			if(-1==fseek(fd,0,SEEK_END))
+			{
+				printf("seek error %d\n",errno);
+				return ID_UN_EXIST;
+			}
+	char write_buf[1024];
+	bzero(write_buf,1024);
+	strcpy(write_buf,"blogitem_num=");
+	strcat(write_buf,temnum);
+	strcat(write_buf,"\n");
+	printf("write %s\n",write_buf);
+			if(EOF==fputs(write_buf,fd))
+			{
+			printf("fputs error %d\n",errno);	
+			}
+			bzero(write_buf,1024);
+			strcpy(write_buf,"blog=");
+			strcat(write_buf,GetPushMes->valuestring);
+	strcat(write_buf,"\n");
+	printf("write %s\n",write_buf);
+			if(EOF==fputs(write_buf,fd))
+			{
+			printf("fputs error %d\n",errno);	
+			}
+		
+	flock(fd->_fileno,LOCK_UN);
+	fclose(fd);
+}
+/*
+   PAC_CODE_FEED get_friend_static(cJSON*m_Json)
+   {
+   cJSON*GetIDPAS=cJSON_GetObjectItem(m_Json,"User_Mes");
+   cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
+   cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
+   char user_path[256];
+   bzero(user_path,256);
+   FILE*fd;
+   strcpy(user_path,"./SERVER_MESSAGE/");
+   strcat(user_path,GetId->valuestring);
+   if(!(fd=fopen(user_path,"r")))
+   {
+   printf("fopen error%d\n",errno);
+   return ID_UN_EXIST;	
+   }//只返回三日内的动态
+   char *friend_list[MAX_FRIEND];
+   int i=0;
+   for (i=0;i<MAX_FRIEND;i++)
+   {
+   friend_list[i]=NULL;
+
+   }
+   char tempbuf[1024];
+   bzero(tempbuf,1024);
+   char *friendlist=NULL;
+   while(fgets(tempbuf,1024,fd))
+   {
+
+   char *savpoint=NULL;
+   char *us=strtok_r(tempbuf,"=",&savpoint);
+
+   if(strcmp(us,"friend")==0)
+   {
+   friendlist=strtok_r(NULL,"=",&savpoint);
+   fclose(fd);
+   break;
+   }
+
+   }
+   i=0;
+   char *savpoint2=NULL;
+   char *getname_list=NULL;
+   while((getname_list=strtok_r(friendlist,",",&savpoint2)))
+   {
+   friend_list[i]=(char *)malloc(MAX_NAME_LENGTH);
+   bzero(friend_list[i],MAX_NAME_LENGTH);
+   strcpy(friend_list[i++],getname_list);
+   }
+   int h;
+   char *datastr=getdata();
+   char tempbuf2[4096];
+   for(h=0;h<i;h--)
+   {
+   bzero(user_path,256);
+
+   FILE*fd_friend;
+   strcpy(user_path,"./SERVER_MESSAGE/");
+   strcat(user_path,friend_list[h]);
+   strcat(user_path,".mes");
+   if(!(fd_friend=fopen(user_path,"r")))
+   {
+   printf("fopen error%d\n",errno);
+
+   }
+
+   while(fgets(tempbuf2,4096,fd_friend))
+   {
 
 
 
-	fclose(fd_friend);
+}
+
+
+
+fclose(fd_friend);
 
 }
 
@@ -513,7 +543,7 @@ void deal_feed_back(int client_fd,PAC_CODE_FEED feedback,char *pack_type,char* p
 	char *ch=cJSON_PrintUnformatted(con_pack);
 	//char send_ch[4096];
 	//bzero(send_ch,4096);
-	
+
 	//m_strcpy(send_ch,ch);
 	printf("send:%s to client\n",/*send_*/ch);
 	ssize_t writewords;
