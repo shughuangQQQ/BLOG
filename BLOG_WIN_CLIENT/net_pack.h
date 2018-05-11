@@ -13,7 +13,8 @@ typedef enum m_typ{ID_111,
                    PASSWARD_ERROR,
                    LOG_SUCCESS ,
                    NO_FRIEND,
-                   FOUCS_SUCCESS}PAC_CODE_FEED;
+                   FOUCS_SUCCESS,
+                  SET_HEAD_SUCCESS}PAC_CODE_FEED;
 typedef enum {FALSE,TRUE}BOOL;
 typedef struct node
 {

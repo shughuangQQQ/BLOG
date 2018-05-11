@@ -9,6 +9,7 @@
 #include"dataras.h"
 #include"find_mes_input.h"
 #include"meform.h"
+#include"signupform.h"
 class UI_FLUSH_UTIL:public QObject
 {
      Q_OBJECT
@@ -23,6 +24,8 @@ public:
       ~UI_FLUSH_UTIL();
     Blog*m_blog_ui;
       QString m_id;
+     SignUpForm* m_sign_form;
+
 private:
 
    QString m_pass;
@@ -30,6 +33,7 @@ signals:
    void sendtoNetUtil();
 public slots:
    void ShowMeForm();
+   void hide_sign();
    void getpass();
    void FOCUS_OK();
    void Ui_LOG_CLOSE();

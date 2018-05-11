@@ -1,4 +1,7 @@
 #include "deal_qjson.h"
+#include<QFile>
+#include<QDebug>
+
 
 Deal_QJson::Deal_QJson(QObject *parent) : QObject(parent)
 {
@@ -14,6 +17,63 @@ QJsonObject* Deal_QJson::CreateFindJson(QString find_id)
     findjson->insert("FIND_MES",QJsonValue(JsonPack));
 
    return findjson;
+}
+QJsonObject *Deal_QJson::CreateHeadPixJson(QString pix_address,QString userid)
+{
+
+   QFile file(pix_address);
+    if(file.size()>1024*1024)
+    {
+        return NULL;
+    }
+        //判断文件是否存在
+        if(file.exists()){
+            qDebug()<<"file exist";
+        }else{
+            qDebug()<<"file un exist";
+        }
+        //已读写方式打开文件，
+        //如果文件不存在会自动创建文件
+        if(!file.open(QIODevice::ReadOnly)){
+            qDebug()<<"open failed";
+        }else{
+            qDebug()<<"open success";
+        }
+
+        //读取文件
+
+
+        QByteArray QBA=file.readAll();
+
+        file.close();
+         char *ch=QBA.data();
+
+        QString string;
+        string = QString(QBA);
+
+
+        QJsonObject *head_pix_json=new QJsonObject;
+
+
+
+
+
+        head_pix_json->insert("PACK_TYPE","HEAD_SET");
+        head_pix_json->insert("id",userid);
+        head_pix_json->insert("head_pix",);
+        return head_pix_json;
+
+}
+QJsonObject *Deal_QJson::CreateSignJson(QString userid,QString userpassward)
+{
+
+    QJsonObject *signjson=new QJsonObject;
+
+
+    signjson->insert("PACK_TYPE","SIGN_UP");
+    signjson->insert("id",userid);
+    signjson->insert("passward",userpassward);
+    return signjson;
 }
  QJsonObject* Deal_QJson::CreatePush_StaticJson(QString push_mes,QString m_id)
 {

@@ -1,6 +1,7 @@
 #include "meform.h"
 #include "ui_meform.h"
 #include "mainwindow.h"
+#include<QFileDialog>
 MeForm::MeForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MeForm)
@@ -45,4 +46,10 @@ void MeForm::me_setmes()
 void MeForm::on_pushButton_clicked()
 {
     emit Push_Me_Static(ui->lineEdit->text());
+}
+
+void MeForm::on_pushButton_2_clicked()//change head
+{
+   QString file_name = QFileDialog::getOpenFileName(NULL,"选择一个jpg头像",".","*.jpg");
+   emit set_head_pix(file_name);
 }

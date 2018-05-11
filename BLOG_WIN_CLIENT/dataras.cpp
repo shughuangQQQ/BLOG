@@ -45,6 +45,46 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
         emit USER_FIND(nFrom);
 
 }
+ void DataRAS::Sign_Request()
+ {
+     QJsonObject *Sign_Json=Deal_QJson::CreateSignJson(this->m_log_in_id,this->m_log_in_passward);
+     QString sendbuf=Deal_QJson::JsonToStr(Sign_Json);
+     this->SendToSocket(sendbuf);
+     delete Sign_Json;
+     Sign_Json=NULL;
+
+
+     QString m_recvbuf=this->RecvFromSocket();
+
+
+    QJsonDocument document;
+
+    Deal_QJson::StrToJson(m_recvbuf,&document);
+    QJsonObject object=document.object();
+
+
+    int nFrom=-1;
+    if (object.contains("PACK_CODE_FEED"))
+    {
+
+            QJsonValue value = object.value("PACK_CODE_FEED");
+            if (value.isDouble()) {
+                nFrom = value.toVariant().toInt();
+                qDebug() << "PACK_CODE_FEED : " << nFrom;
+            }
+    }
+    if(nFrom==SIGN_UP_SUCCESS)
+    {
+        QMessageBox::about(NULL, "SIGN", "SIGN OK!");
+        emit hide_sign_window();
+    }
+    else if(nFrom==ID_EXIST)
+    {
+        QMessageBox::about(NULL, "SIGN", "FAILED:ID exists");
+    }
+
+
+ }
   DataRAS::~DataRAS()
   {
 
@@ -214,7 +254,24 @@ void DataRAS::RequestSelfMes()
     }
  }
 
+  void DataRAS::Head_Upload(QString pix_address)
+  {
 
+      QJsonObject *Head_Pix_Json=Deal_QJson::CreateHeadPixJson(pix_address,m_log_in_id);
+       if(Head_Pix_Json==NULL)
+       {
+            QMessageBox::about(NULL, "HEAD_SET", "HEAD IS TOO BIG Please keep pix less than 1m!");
+           return;
+       }
+      QString sendbuf=Deal_QJson::JsonToStr(Head_Pix_Json);
+
+      this->SendToSocket(sendbuf);
+      delete Head_Pix_Json;
+      Head_Pix_Json=NULL;
+
+
+
+  }
  QString DataRAS::RecvFromSocket()
  {
     char str[4096];

@@ -20,7 +20,7 @@ Q_TCP_Util::Q_TCP_Util(QObject *parent) : QObject(parent)
 }
 int Q_TCP_Util::f_send(QString m_pac)
 {
-  qDebug()<<"111111"<<m_pac;
+
 
    char*  ch;
    QByteArray ba = m_pac.toLatin1(); // must

@@ -14,9 +14,20 @@ class SignUpForm : public QWidget
 public:
     explicit SignUpForm(QWidget *parent = 0);
     ~SignUpForm();
+    int sign_blag;
+    QWidget*use;
+private slots:
+    void on_pushButton_clicked();
+    void Is_Avialble();
+    void on_pushButton_2_clicked();
 
 private:
     Ui::SignUpForm *ui;
+signals:
+   void check_aviable();
+   void send_sign_request();
+
+
 };
 
 #endif // SIGNUPFORM_H

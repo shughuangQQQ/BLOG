@@ -27,8 +27,11 @@ public slots:
     void F_USER_FOUCS(QString);
    void RequestSelfMes();
   void Push_Person_Static(QString);
+  void Sign_Request();
+  void Head_Upload(QString);
 private:
 signals:
+  void hide_sign_window();
     void FOCUS_SEND();
     void CloseLogUi();
     void USER_FIND(int);
