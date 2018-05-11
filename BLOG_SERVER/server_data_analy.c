@@ -140,17 +140,23 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 		deal_feed_back(client_fd,feed_code,(char *)"FIND_FEED");	
 
 	}
-	/*else if(!strcmp(Packs_type->valuestring,"sign_up"))
-	  {
+	else if(!strcmp(Packs_type->valuestring,"SIGN_UP"))
+	{
 
-	  feed_code=sign_up_acess(m_anly_json);
-	  deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
-	  }*/
+		feed_code=sign_up_acess(m_anly_json);
+		deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
+	}
 	else if(!strcmp(Packs_type->valuestring,"FOCUS"))
 	{
 
 		feed_code=foucus_on_friend(m_anly_json);
 		//deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
+	}
+	else if(!strcmp(Packs_type->valuestring,"HEAD_SET"))
+	{
+
+		feed_code=Save_Head(m_anly_json);
+		//deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
 	}
 	else if(!strcmp(Packs_type->valuestring,"push_static"))
 	{
@@ -175,6 +181,34 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 	}
 
 	cJSON_Delete(m_anly_json);
+}
+PAC_CODE_FEED Save_Head(cJSON*m_Json)
+{
+
+	cJSON*GetId=cJSON_GetObjectItem(m_Json,"id");
+	cJSON*GetPix=cJSON_GetObjectItem(m_Json,"head_pix");
+	FILE*fd;
+	char user_path[256];
+	bzero(user_path,256);
+
+	strcpy(user_path,"./SERVER_MESSAGE/");
+	strcat(user_path,GetId->valuestring);
+	strcat(user_path,".jpg");
+	if(0==access(user_path,F_OK))
+	{
+		remove(user_path);	
+	}
+	if(!(fd=fopen(user_path,"a")))
+	{
+		printf("open error %d\n",errno);
+		return ID_UN_EXIST;
+	}
+	if(EOF==fputs(GetPix->valuestring,fd))
+	{
+		printf("fputs error %d\n",errno);	
+	}
+	fclose(fd);
+	return SET_HEAD_SUCCESS;
 }
 PAC_CODE_FEED Get_Myself_Mes(cJSON* m_Json,cJSON *body_pack)
 {
@@ -260,7 +294,7 @@ PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 		printf("file already lock,waite for unlock\n");
 	char tempbuf[1024];
 	bzero(tempbuf,1024);
-	
+
 	int blog_num_line=0;
 	int num=0;
 	int i;
@@ -268,11 +302,11 @@ PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 	bzero(temnum,10);
 	while(fgets(tempbuf,1024,fd))
 	{
-	printf("%s\n",tempbuf);	
+		printf("%s\n",tempbuf);	
 		blog_num_line++;
 		char *savpoint=NULL;
 		char *us=strtok_r(tempbuf,"=",&savpoint);
-		
+
 		if(0==strncmp(us,"blogitem_num",strlen("blogitem_num")))
 		{
 			printf("find\n");
@@ -300,31 +334,31 @@ PAC_CODE_FEED push_person_mes(cJSON*m_Json)//发布个人动态
 		return ID_UN_EXIST;
 	printf("blog_num_line %d\n",blog_num_line);
 	remove_line(fd,blog_num_line,user_path);
-			if(-1==fseek(fd,0,SEEK_END))
-			{
-				printf("seek error %d\n",errno);
-				return ID_UN_EXIST;
-			}
+	if(-1==fseek(fd,0,SEEK_END))
+	{
+		printf("seek error %d\n",errno);
+		return ID_UN_EXIST;
+	}
 	char write_buf[1024];
 	bzero(write_buf,1024);
 	strcpy(write_buf,"blogitem_num=");
 	strcat(write_buf,temnum);
 	strcat(write_buf,"\n");
 	printf("write %s\n",write_buf);
-			if(EOF==fputs(write_buf,fd))
-			{
-			printf("fputs error %d\n",errno);	
-			}
-			bzero(write_buf,1024);
-			strcpy(write_buf,"blog=");
-			strcat(write_buf,GetPushMes->valuestring);
+	if(EOF==fputs(write_buf,fd))
+	{
+		printf("fputs error %d\n",errno);	
+	}
+	bzero(write_buf,1024);
+	strcpy(write_buf,"blog=");
+	strcat(write_buf,GetPushMes->valuestring);
 	strcat(write_buf,"\n");
 	printf("write %s\n",write_buf);
-			if(EOF==fputs(write_buf,fd))
-			{
-			printf("fputs error %d\n",errno);	
-			}
-		
+	if(EOF==fputs(write_buf,fd))
+	{
+		printf("fputs error %d\n",errno);	
+	}
+
 	flock(fd->_fileno,LOCK_UN);
 	fclose(fd);
 }
@@ -554,46 +588,66 @@ void deal_feed_back(int client_fd,PAC_CODE_FEED feedback,char *pack_type,char* p
 	cJSON_Delete(con_pack);
 }
 
-/*PAC_CODE_FEED sign_up_acess(cJSON* SIGN_MES)
-  {
-  cJSON*GetIDPAS=cJSON_GetObjectItem(SIGN_MES,"User_Mes");
-  cJSON*GetId=cJSON_GetObjectItem(GetIDPAS,"id");
-  cJSON*GetPassward=cJSON_GetObjectItem(GetIDPAS,"passward");
+PAC_CODE_FEED sign_up_acess(cJSON* SIGN_MES)
+{
+	cJSON*GetId=cJSON_GetObjectItem(SIGN_MES,"id");
+
+	cJSON*GetPassward=cJSON_GetObjectItem(SIGN_MES,"passward");
 
 
-  char user_path[256];
-  bzero(user_path,256);
-  FILE*fd;
-  strcpy(user_path,"./SERVER_MESSAGE/");
-  strcat(user_path,GetId->valuestring);
-  if((fd=fopen(user_path,"r")))
-  {
-  fclose(fd);
-  return ID_EXIST;	
-  }
-  if(!(fd=fopen(user_path,"a")))
-  {
+	char user_path[256];
+	bzero(user_path,256);
+	FILE*fd;
+	strcpy(user_path,"./SERVER_MESSAGE/");
+	strcat(user_path,GetId->valuestring);
+	if(0==access(user_path,F_OK))
+		return ID_EXIST;
+	if(!(fd=fopen(user_path,"a")))
+	{
 
-  printf("open error %d\n",errno);
-  }
-  char *userid=GetId->valuestring;
-  char *pasward=GetPassward->valuestring;
-  char writetemp_buf[1024];
-  bzero(writetemp_buf,1024);
-  strcpy(writetemp_buf,userid);
-  strcpy(writetemp_buf,"=");
-  strcpy(writetemp_buf,passward);
+		printf("open error %d\n",errno);
+		return ID_EXIST;
+	}
+	if(0!=(flock(fd->_fileno,LOCK_EX)))
+		printf("file already lock,waite for unlock\n");
+	char *userid=GetId->valuestring;
+	char *pasward=GetPassward->valuestring;
+	char writetemp_buf[1024];
+	bzero(writetemp_buf,1024);
+	strcpy(writetemp_buf,userid);
+	strcat(writetemp_buf,"=");
+	strcat(writetemp_buf,pasward);
+	strcat(writetemp_buf,"\n");
 
-  if(EOF==fputs(writetemp_buf,fd))
-  {
-  printf("error on write new sign_up file %d\n",errno);
-  }
-  if(EOF==fputs("friend=shugh",fd))
-  {
-  printf("error on write new sign_up file %d\n",errno);
-  }
-  fclose(fd);
-  return SIGN_UP_SUCCESS;
+	if(EOF==fputs(writetemp_buf,fd))
+	{
+		printf("error on write new sign_up file %d\n",errno);
+	}
+	if(EOF==fputs("friend=shugh\n",fd))
+	{
+		printf("error on write new sign_up file %d\n",errno);
+	}
+	if(EOF==fputs("fans=shugh\n",fd))
+	{
+		printf("error on write new sign_up file %d\n",errno);
+	}
+	if(EOF==fputs("fans_num=shugh\n",fd))
+	{
+		printf("error on write new sign_up file %d\n",errno);
+	}
+	if(EOF==fputs("Brief=nothing\n",fd))
+	{
+		printf("error on write new sign_up file %d\n",errno);
+	}
+	if(EOF==fputs("blogitem_num=0\n",fd))
+	{
+		printf("error on write new sign_up file %d\n",errno);
+	}
+
+	fclose(fd);
+	flock(fd->_fileno,LOCK_UN);
+
+	return SIGN_UP_SUCCESS;
 
 
-  }*/
+}

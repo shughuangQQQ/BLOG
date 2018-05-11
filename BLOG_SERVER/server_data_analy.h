@@ -17,7 +17,7 @@ PAC_CODE_FEED push_person_mes(cJSON*);
 PAC_CODE_FEED Get_Myself_Mes(cJSON*,cJSON*);
 char * getdata();
 void m_strcpy(char *,char*);
-
+PAC_CODE_FEED Save_Head(cJSON*);
 
 
 
