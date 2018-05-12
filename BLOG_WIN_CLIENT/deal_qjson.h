@@ -19,7 +19,7 @@ public:
      static QJsonObject* CreateFoucsJson(QString,QString);
      static  QJsonObject* CreatePush_StaticJson(QString,QString);
     static QJsonObject *CreateSignJson(QString,QString);
-    static QJsonObject *CreateHeadPixJson(QString,QString);
+    //static QJsonObject *CreateHeadPixJson(QString,QString);
 signals:
 
 public slots:

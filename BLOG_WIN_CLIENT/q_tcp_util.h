@@ -8,7 +8,7 @@
 class Q_TCP_Util : public QObject
 {
     Q_OBJECT
-private:
+public:
     QTcpSocket*client_socket;
 public:
      explicit Q_TCP_Util(QObject *parent = nullptr);

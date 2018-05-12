@@ -43,7 +43,7 @@ DataRAS::DataRAS(Q_TCP_Util *tcpsoc)
      }
 
         emit USER_FIND(nFrom);
-
+    return TRUE;
 }
  void DataRAS::Sign_Request()
  {
@@ -257,7 +257,7 @@ void DataRAS::RequestSelfMes()
   void DataRAS::Head_Upload(QString pix_address)
   {
 
-      QJsonObject *Head_Pix_Json=Deal_QJson::CreateHeadPixJson(pix_address,m_log_in_id);
+     /* QJsonObject *Head_Pix_Json=Deal_QJson::CreateHeadPixJson(pix_address,m_log_in_id);
        if(Head_Pix_Json==NULL)
        {
             QMessageBox::about(NULL, "HEAD_SET", "HEAD IS TOO BIG Please keep pix less than 1m!");
@@ -267,8 +267,51 @@ void DataRAS::RequestSelfMes()
 
       this->SendToSocket(sendbuf);
       delete Head_Pix_Json;
-      Head_Pix_Json=NULL;
+      Head_Pix_Json=NULL;*/
 
+      QFile file(pix_address);
+       if(file.size()>BODY_SIZE)
+       {
+           return;
+       }
+           //判断文件是否存在
+           if(file.exists()){
+               qDebug()<<"file exist";
+           }else{
+               qDebug()<<"file un exist";
+           }
+           //已读写方式打开文件，
+           //如果文件不存在会自动创建文件
+           if(!file.open(QIODevice::ReadOnly)){
+               qDebug()<<"open failed";
+           }else{
+               qDebug()<<"open success";
+           }
+
+           //读取文件
+
+
+           QByteArray QBA=file.readAll();
+
+           file.close();
+
+
+      NET_PACK m_pack_conv;
+      //strcpy_s(m_pack_conv.packbody,QBA.size(),QBA.data());
+      strcpy(m_pack_conv.packtail,m_log_in_id.toLatin1().data());
+      m_pack_conv.file_size=QBA.size();
+        m_pack_conv.packtype=PACK_HEAD_FILE;
+        for(int i=0;i<QBA.size();i++)
+        {
+            m_pack_conv.packbody[i]=(QBA.data())[i];
+
+        }
+      this->m_tcp->client_socket->write((char*)&m_pack_conv,(qint64)PACK_SIZE);
+        if( this->m_tcp->client_socket->waitForBytesWritten())
+        {
+
+            return ;
+        }
 
 
   }

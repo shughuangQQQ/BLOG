@@ -18,7 +18,7 @@ QJsonObject* Deal_QJson::CreateFindJson(QString find_id)
 
    return findjson;
 }
-QJsonObject *Deal_QJson::CreateHeadPixJson(QString pix_address,QString userid)
+/*QJsonObject *Deal_QJson::CreateHeadPixPack(QString pix_address,QString userid)
 {
 
    QFile file(pix_address);
@@ -63,7 +63,7 @@ QJsonObject *Deal_QJson::CreateHeadPixJson(QString pix_address,QString userid)
         head_pix_json->insert("head_pix",);
         return head_pix_json;
 
-}
+}*/
 QJsonObject *Deal_QJson::CreateSignJson(QString userid,QString userpassward)
 {
 
