@@ -94,8 +94,18 @@ void *analysedata(int client_fd,int m_epoll_fd)
 
 	if((read_buf=read(client_fd,pack,PACK_SIZE))>0)
 	{
-		printf("%s\n",pack);	
-		deal_with_data(pack,client_fd,m_epoll_fd);
+		cJSON*m_anly_json=cJSON_Parse(pack);
+		if(m_anly_json)
+		{	
+			printf("%s\n",pack);	
+			deal_with_data(m_anly_json,client_fd,m_epoll_fd);
+			cJSON_Delete(m_anly_json);
+		}
+		else 
+		{
+			deal_with_file(pack,read_buf);
+			printf("recv file\n");	
+		}
 		free(pack);
 		pack=NULL;
 	}
@@ -120,10 +130,17 @@ PAC_CODE_FEED Get_Find_User(cJSON* m_object)
 	return ID_EXIST;
 
 }
-void deal_with_data(char* pack,int client_fd,int epollfd)
+void deal_with_file(char *pack,int read_length)
+{
+	NET_PACK* m_pack=(NET_PACK*)pack;
+	if(m_pack->packtype==PACK_HEAD_FILE)
+	{
+	Save_Head(m_pack);	
+	}
+}
+void deal_with_data(cJSON* m_anly_json,int client_fd,int epollfd)
 {
 
-	cJSON*m_anly_json=cJSON_Parse(pack);
 	//free(pack);
 	cJSON*Packs_type=cJSON_GetObjectItem(m_anly_json,"PACK_TYPE");
 	PAC_CODE_FEED feed_code;	
@@ -152,12 +169,6 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 		feed_code=foucus_on_friend(m_anly_json);
 		//deal_feed_back(client_fd,feed_code,(char *)"sign_up_feed");	
 	}
-	else if(!strcmp(Packs_type->valuestring,"HEAD_SET"))
-	{
-
-		feed_code=Save_Head(m_anly_json);
-		//deal_feed_back(client_fd,feed_code,(char *)"push_static_feed");	
-	}
 	else if(!strcmp(Packs_type->valuestring,"push_static"))
 	{
 
@@ -180,19 +191,18 @@ void deal_with_data(char* pack,int client_fd,int epollfd)
 
 	}
 
-	cJSON_Delete(m_anly_json);
 }
-PAC_CODE_FEED Save_Head(cJSON*m_Json)
+PAC_CODE_FEED Save_Head(NET_PACK*m_data)
 {
 
-	cJSON*GetId=cJSON_GetObjectItem(m_Json,"id");
-	cJSON*GetPix=cJSON_GetObjectItem(m_Json,"head_pix");
+	
+
 	FILE*fd;
 	char user_path[256];
 	bzero(user_path,256);
 
 	strcpy(user_path,"./SERVER_MESSAGE/");
-	strcat(user_path,GetId->valuestring);
+	strcat(user_path,m_data->packtail);
 	strcat(user_path,".jpg");
 	if(0==access(user_path,F_OK))
 	{
@@ -203,10 +213,12 @@ PAC_CODE_FEED Save_Head(cJSON*m_Json)
 		printf("open error %d\n",errno);
 		return ID_UN_EXIST;
 	}
-	if(EOF==fputs(GetPix->valuestring,fd))
+	/*if(EOF==fputs(GetPix->valuestring,fd))
 	{
 		printf("fputs error %d\n",errno);	
-	}
+	}*/
+	write(fd->_fileno,m_data->packbody,m_data->file_size);
+
 	fclose(fd);
 	return SET_HEAD_SUCCESS;
 }
